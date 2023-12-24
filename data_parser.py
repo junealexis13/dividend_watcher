@@ -37,3 +37,4 @@ class StockData:
             return {"stock_code" : stock_code, "div_data": self.temp_data}
         elif len(self.temp_data) == 0:
             raise Dividend_Data_Error()
+        
