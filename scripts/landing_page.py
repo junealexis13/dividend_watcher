@@ -4,6 +4,7 @@ from scripts.configs import TOML
 from scripts.data_parser import StockData
 from scripts.app_state import STATE
 from scripts.exceptions import *
+
 class UI:
     def __init__(self) -> None:
         #instantiate configs
@@ -13,43 +14,30 @@ class UI:
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
 
-    def create_columns(self, stock_picks = []):
-        if not st.session_state["logged-in"]:
-            #create cols
-            col_nums = 5
-            cols = st.columns(col_nums)
+    def create_columns(self, ticker_name):
+        #create cols
+        col_nums = 3
+        cols = st.columns(col_nums)
 
-            #iterate through cols created
-            try:
-                for col_name, col in zip(stock_picks, cols):
-                    #Fetch the info in PD Form
+        #iterate through cols created
+        try:
+            #Fetch the info in PD Form
+            curr, prev = self.DATA.pack_dividend_data(ticker_name)
+            delta_value = curr - prev
+            with cols[0]:
+                st.metric(f"DV YLD ({str(self.current_datetime.year)}) ",f"₱{round(curr,2)}/s", delta = round(delta_value, 2))
+                st.markdown(f"<p style ='font-size:0.75rem;'>₱ {round(prev,2)}/s ({str(self.current_datetime.year-1)})</p>", unsafe_allow_html=True)
 
-                    df = self.DATA.pack_dividend_data(col_name)
+        except Dividend_Data_Error:
+            st.error("Recently added stocks does not have a Dividend Data. Consider other dividend stocks.")
 
-                    current_div_data = df.loc[(df["Year"] == str(self.current_datetime.year)) & (df["Type"] == "Cash")]
-                    current_total_div = sum([float(x.strip("Php")) for x in current_div_data["Rate"]])
+        except AttributeError:
+            if ticker_name is None:
+                st.info('Choose dividend stock to view.')
+            else:
+                st.error('Problem with Data Parser')
+        
 
-                    prev_div_data = df.loc[(df["Year"] == str(self.current_datetime.year - 1)) & (df["Type"] == "Cash")]
-                    prev_total_div = sum([float(x.strip("Php")) for x in prev_div_data["Rate"]])
-
-                    with col:
-                        col.metric(col_name,f"₱{round(current_total_div,2)}",f"₱ {round(prev_total_div,2)}" )
-
-                    #Reset the current_div_data each loop to address the problem
-
-
-            except Dividend_Data_Error:
-                st.error("Recently added stocks does not have a Dividend Data. Consider other dividend stocks.")
-            
-        else:
-            #create cols
-            col_nums = len(self.cols)
-            cols = st.columns(col_nums)
-
-            #iterate through cols created
-            for col_name, col in zip(self.cols, cols):
-                with col:
-                    st.header(col_name)
     
     def introduction(self):
         st.caption('''<!DOCTYPE html>
@@ -76,19 +64,19 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
             with col2:
                 if not st.session_state['logged-in']:
-                    st.markdown('<p style="font-size:2rem; font-family:Fantasy;">Logged in as: <span style="color:#ffde59; font-size:2.5rem; font-family:Fantasy;">GUEST</span></p>', unsafe_allow_html=True)
+                    st.markdown('<p style="font-size:2rem; font-family:Fantasy;">Logged in as: <span style="color:#ffde59; font-size:2.2rem; font-family:Fantasy;">GUEST</span></p>', unsafe_allow_html=True)
                     st.caption("Login or register an account.")
                 else:
                     st.header("*VIEWING THE PROFILE IF LOGGED IN*")
 
     def custom_selection(self):
         if not st.session_state["logged-in"]:
-            options = st.multiselect(
-                    'View Stock Picks',
+            stockPick = st.selectbox(
+                    'View Dividend Stock',
                     self.TOML.get_PSE_list(),
-                    [], max_selections= 5,
+                    index=None,
                     help='Choose what Stock Dividends to show')
-            return options
+            return stockPick
         
         else:
             options = st.multiselect(
@@ -100,7 +88,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         
     def section_body1(self):
         if not st.session_state["logged-in"]:
-            with st.expander("Show quick dividend details"):
-                st.divider()
-                stocks = self.custom_selection()
-                self.create_columns(stocks)
+            try:
+                stocks = self.custom_selection()            
+                with st.container(border=True):
+                    st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Fantasy;"> {stocks} - {self.TOML.get_company_name(stocks)[0]}</p>''', unsafe_allow_html=True)
+                    self.create_columns(stocks)
+            except TypeError as e:
+                st.error(f'Error message. {e}')

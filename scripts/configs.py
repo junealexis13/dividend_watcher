@@ -16,7 +16,7 @@ class TOML:
         elif mode.lower() == "name":
             return list(df["company_name"])
         elif mode.lower() == "all":
-            return df[['symbol'],['name']]       
+            return df[['symbol','company_name']]       
         else:
             raise Mode_Error
         
@@ -27,6 +27,15 @@ class TOML:
     def get_stockpicks(self) -> str:
         return self.config_load()['stockPicks']
     
+    def get_company_name(self, ticker_symbol):
+        try:
+            df = self.get_PSE_list("all")
+            comp_name = df.loc[df["symbol"] == ticker_symbol.upper()]
+            return comp_name["company_name"].values
+        
+        except AttributeError:
+            print("Empty Input")
+        
     def config_edit(self, edit_mode, *new_stock_pics):
         #Check the stockpicks first
         for comps in new_stock_pics:

@@ -12,7 +12,7 @@ class Dividend_Data_Error(Exception):
         super().__init__(self.message)
 
 class Mode_Error(Exception):
-    def __init__(self, message = "The MODE you pass is invalid. Either pass |ticker| or |name|") -> None:
+    def __init__(self, message = "The MODE you pass is invalid. Either pass |ticker|,|name|, or |all| ") -> None:
         self.message = message
 
         super().__init__(self.message)
