@@ -14,7 +14,9 @@ class TOML:
         if mode.lower() == "ticker":
             return list(df['symbol'])
         elif mode.lower() == "name":
-            return list(df["company_name"])       
+            return list(df["company_name"])
+        elif mode.lower() == "all":
+            return df[['symbol'],['name']]       
         else:
             raise Mode_Error
         

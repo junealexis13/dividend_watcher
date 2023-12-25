@@ -7,4 +7,6 @@ if __name__ == "__main__":
 
     A = UI()
     A.introduction()
-    A.create_columns()
+    A.profile_view()
+
+    A.section_body1()

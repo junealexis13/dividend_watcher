@@ -38,3 +38,7 @@ class StockData:
         elif len(self.temp_data) == 0:
             raise Dividend_Data_Error()
         
+
+    def pack_dividend_data(self, stock_code):
+        div_data = self.get_dividend_data(stock_code=stock_code)
+        return pd.DataFrame.from_dict(div_data["div_data"],orient="index", columns=['Year','Type','Rate','ExDate','RecordDate','PaymentDate'])
