@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from exceptions import *
+from scripts.exceptions import *
 from bs4 import BeautifulSoup
 
 
