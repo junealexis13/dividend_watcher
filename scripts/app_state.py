@@ -11,3 +11,6 @@ class STATE:
 
         if "stock_on_view" not in st.session_state:
             st.session_state['stock_on_view'] = None
+
+        if "error_message" not in st.session_state:
+            st.session_state["error_message"] = None

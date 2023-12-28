@@ -18,7 +18,7 @@ class StockData:
 
         self.current_datetime = datetime.now()
         self.current_market_stat_address = "https://phisix-api2.appspot.com/stocks.json"
-
+        self.current_stock_stat_address = "https://phisix-api2.appspot.com/stocks/"
 
     def get_dividend_data(self, stock_code: str):
         self.temp_data = {}
@@ -33,21 +33,21 @@ class StockData:
         get_labels = soup.find_all("label")
 
         previous_percentage = get_labels[1].text
-        loc_str_prcent = re.search(r'\d+\.\d+%', previous_percentage)
+        loc_str_prcent = re.search(r'\d+(\.\d+)?%', previous_percentage)
 
         if loc_str_prcent:
             percent_prev = loc_str_prcent.group()
         else:
-            raise Dividend_Data_Error
+            raise Dividend_Data_Error(message="DDE1.1")
 
         #Get current Price
         curr_price = get_labels[0].text
-        loc_str_price = re.search(r'\d+\.\d+', curr_price)
+        loc_str_price = re.search(r'\d+(\.\d+)?', curr_price)
 
         if loc_str_price:
             curr_prce_pershare = loc_str_price.group()
         else:
-            raise Dividend_Data_Error
+            raise Dividend_Data_Error(message="DDE1.2")
 
 
         #Take note that the data structure was identified as [Year,Dividend Type,Rate,Ex-Dividend Date,Record Date,Payment Date]
@@ -57,14 +57,13 @@ class StockData:
             for i, div_data in enumerate(data):
                 if i%6==0:
                     self.temp_data[len(self.temp_data) + 1] = [x.text.strip("<td>/") for x in data[i:i+6]]
-
         else:
-            raise Data_Structure_Error()
+            raise Data_Structure_Error
 
         if len(self.temp_data) > 0:
             return {"stock_code" : stock_code, "curr_price": curr_prce_pershare, "previous_year_percent": percent_prev, "div_data": self.temp_data}
         elif len(self.temp_data) == 0:
-            raise Dividend_Data_Error()
+            raise Dividend_Data_Error(message='DDE1.3')
 
 
     def pack_dividend_data(self, stock_code):
@@ -88,6 +87,10 @@ class StockData:
         except Exception as e:
             st.error(e)
 
-    def get_current_equity_data(self):
-        stock = st.session_state["stock_on_view"]
-        return self.get_market_stats()['stock']
+    def get_stock_stats(self, ticker_name):
+        try:
+            req = requests.get(self.current_stock_stat_address + f"{ticker_name}.json")
+            mquote = req.json()
+            return mquote
+        except Exception as e:
+            st.error(e)

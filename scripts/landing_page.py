@@ -14,7 +14,9 @@ class UI:
         self.SessionStates = STATE()
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
-        self.PSE_stats = self.DATA.get_market_stats()
+        
+
+        self.PSE_stats = self.DATA.get_stock_stats(st.session_state['stock_on_view']) 
 
     def create_columns(self, ticker_name):
         #create cols
@@ -36,23 +38,20 @@ class UI:
 
             with cols[2]:
                 if st.session_state["stock_on_view"] is not None:
-                    for stock_data in self.PSE_stats['stock']:
-                        if st.session_state["stock_on_view"] == stock_data["symbol"]:
-                            st.metric("Current Equity Data",f"₱{stock_data['price']['amount']}",f"{stock_data['percent_change']}%")
-                            break
+                    data_stock = self.PSE_stats['stock'][0]
+                    st.metric("Current Equity Data",f"₱{data_stock['price']['amount']}",f"{data_stock['percent_change']}%")
+                    st.markdown(f"<p style ='font-size:0.75rem;'>Latest Vol. {int(data_stock['volume']):,}</p>", unsafe_allow_html=True)
 
-                    input_datetime = datetime.fromisoformat(self.PSE_stats['as_of'])
-                    st.markdown(f"<p style ='font-size:0.75rem;'>as of: {input_datetime.strftime('%m/%d/%Y-%I:%M %p')}</p>", unsafe_allow_html=True)
-
-        except Dividend_Data_Error:
+        except Dividend_Data_Error as e:
             st.error(f"{ticker_name} does not have an updated Dividend Data. Consider other dividend stocks.")
+            st.session_state["error_message"] = e
 
         except AttributeError as e:
             if ticker_name is None:
                 st.info('Choose dividend stock to view.')
             else:
                 st.error('Problem with Data Parser')
-                st.write(e)
+                st.session_state["error_message"] = e
 
     def view_all_dividend_info(self, ticker_name):
         self.div_data = self.DATA.get_dividend_data(st.session_state['stock_on_view'])
@@ -137,12 +136,15 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
             except TypeError as e:
                 st.info(f'Choose stock to view') 
+                st.session_state["error_message"] = e
 
             except ValueError as e:
                 #Problems with some pref shares values
                 st.error("A persisting error with Preferred Shares are still being fixed.")
                 st.info("Consider other dividend stocks.")
+                st.session_state["error_message"] = e
 
             except Dividend_Data_Error as e:
                 #The error notice was handled inside the first container
+                st.session_state["error_message"] = e
                 pass
