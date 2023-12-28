@@ -5,7 +5,7 @@ from scripts.exceptions import *
 class TOML:
     def __init__(self) -> None:
         self.working_path = os.getcwd()
-        self.conf_toml = glob.glob(os.path.join(self.working_path,"conf.toml"))
+        self.conf_toml = glob.glob(os.path.join(self.working_path,"user_cookies.toml"))
         self.listed_companies = "resources/listed_company_directory.csv"
 
     def get_PSE_list(self, mode = "ticker" ):

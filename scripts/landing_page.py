@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from datetime import datetime
 from scripts.configs import TOML
 from scripts.data_parser import StockData
@@ -13,6 +14,7 @@ class UI:
         self.SessionStates = STATE()
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
+        self.PSE_stats = self.DATA.get_market_stats()
 
     def create_columns(self, ticker_name):
         #create cols
@@ -31,16 +33,34 @@ class UI:
             with cols[1]:
                 st.metric(f"%YLD to Date",f"{round(curr/(float(curr_price.strip('%')))*100,2)}%", f"{round(curr/(float(curr_price.strip('%')))*100 - float(prev_percent.strip('%')),2)}%")
                 st.markdown(f"<p style ='font-size:0.75rem;'>{prev_percent} ({str(self.current_datetime.year-1)})</p>", unsafe_allow_html=True)
-        except Dividend_Data_Error:
-            st.error("Recently added stocks does not have a Dividend Data. Consider other dividend stocks.")
 
-        except AttributeError:
+            with cols[2]:
+                if st.session_state["stock_on_view"] is not None:
+                    for stock_data in self.PSE_stats['stock']:
+                        if st.session_state["stock_on_view"] == stock_data["symbol"]:
+                            st.metric("Current Equity Data",f"₱{stock_data['price']['amount']}",f"{stock_data['percent_change']}%")
+                            break
+
+                    input_datetime = datetime.fromisoformat(self.PSE_stats['as_of'])
+                    st.markdown(f"<p style ='font-size:0.75rem;'>as of: {input_datetime.strftime('%m/%d/%Y-%I:%M %p')}</p>", unsafe_allow_html=True)
+
+        except Dividend_Data_Error:
+            st.error(f"{ticker_name} does not have an updated Dividend Data. Consider other dividend stocks.")
+
+        except AttributeError as e:
             if ticker_name is None:
                 st.info('Choose dividend stock to view.')
             else:
                 st.error('Problem with Data Parser')
-        
+                st.write(e)
 
+    def view_all_dividend_info(self, ticker_name):
+        self.div_data = self.DATA.get_dividend_data(st.session_state['stock_on_view'])
+        df = pd.DataFrame.from_dict(self.div_data['div_data'], orient="index",columns=['Year','Type','Rate','ExDate','RecordDate','PaymentDate'])
+        st.markdown("<p style='font-align:justify;'>Showing More Dividend Information</p>",unsafe_allow_html=True)
+        st.table(df)
+        st.write(f"<p style ='font-size:0.75rem;'>Data from: <a href='www.pesobility.com'>www.pesobility.com",unsafe_allow_html=True )
+            
     
     def introduction(self):
         st.caption('''<!DOCTYPE html>
@@ -67,34 +87,62 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
             with col2:
                 if not st.session_state['logged-in']:
-                    st.markdown('<p style="font-size:2rem; font-family:Arial;">Logged in as: <span style="color:#ffde59; font-size:2.2rem; font-family:Arial;">GUEST</span></p>', unsafe_allow_html=True)
-                    st.caption("Login or register an account.")
+                    st.markdown('<p style="font-size:1rem; font-family:Arial; color:#03045e;">Logged in as: <span style="color:#03045e;font-size:1rem; font-family:Monospace;font-weight:bold;">GUEST</span></p>', unsafe_allow_html=True)
+                    st.caption("<p style='color:#200E3A'>Login or register an account.", unsafe_allow_html=True)
                 else:
                     st.header("*VIEWING THE PROFILE IF LOGGED IN*")
 
     def custom_selection(self):
         if not st.session_state["logged-in"]:
             stockPick = st.selectbox(
-                    'View Dividend Stock',
+                    'Choose what Dividend Stock to View',
                     self.TOML.get_PSE_list(),
                     index=None,
-                    help='Choose what Stock Dividends to show')
+                    help='Choose what Dividend Stock to show. Make sure the stock ticker is valid.')
+            
+            st.session_state['stock_on_view'] = stockPick
             return stockPick
         
         else:
-            options = st.multiselect(
+            stockPick = st.multiselect(
                     'View Annual Dividend Data',
                     self.TOML.get_PSE_list(),
                     self.TOML.get_stockpicks(), max_selections= 5,
                     help='Choose what Stock Dividends to show')
-            return options
+            st.session_state['stock_on_view'] = stockPick
+
+            return stockPicks
         
+    def pre_section_body1(self):
+        st.divider()
+        st.image("resources\dividend_watch2.png", use_column_width=True)
+
     def section_body1(self):
         if not st.session_state["logged-in"]:
             try:
-                stocks = self.custom_selection()            
-                with st.container(border=True):
-                    st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)[0]}</p>''', unsafe_allow_html=True)
-                    self.create_columns(stocks)
+                self.pre_section_body1()
+                stocks = self.custom_selection()
+                with st.sidebar:
+                    st.header(":gear: Additional Settings")
+                    show_div_data = st.checkbox("Show Dividend Data", value=True)
+                    show_all_dividend_data = st.checkbox("Show Addl. Dividend Data", value=False)
+
+                if show_div_data:           
+                    with st.container(border=True):
+                        st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)[0]}</p>''', unsafe_allow_html=True)
+                        self.create_columns(stocks)
+                if show_all_dividend_data:
+                    with st.container(border=True):
+                        self.view_all_dividend_info(stocks)
+
             except TypeError as e:
                 st.info(f'Choose stock to view') 
+
+            except ValueError as e:
+                #Problems with some pref shares values
+                st.error("A persisting error with Preferred Shares are still being fixed.")
+                st.info("Consider other dividend stocks.")
+
+            except Dividend_Data_Error as e:
+                #The error notice was handled inside the first container
+                pass

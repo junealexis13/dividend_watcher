@@ -1,6 +1,7 @@
 import pandas as pd
 import requests
 import re
+import streamlit as st
 from datetime import datetime
 from scripts.exceptions import *
 from bs4 import BeautifulSoup
@@ -14,11 +15,13 @@ class StockData:
         self.div_address = "https://www.pesobility.com/dividends"
         self.url_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
 
-        self.temp_data = {}
+
         self.current_datetime = datetime.now()
+        self.current_market_stat_address = "https://phisix-api2.appspot.com/stocks.json"
 
 
     def get_dividend_data(self, stock_code: str):
+        self.temp_data = {}
         a = requests.get(self.div_address + f"/{stock_code.upper()}", headers=self.url_headers)
         soup = BeautifulSoup(a.content, 'lxml')
 
@@ -75,3 +78,16 @@ class StockData:
         prev_total_div = sum([float(re.sub(r'[^\d.]', '', x)) for x in prev_div_data["Rate"]])
 
         return current_total_div, prev_total_div, div_data["curr_price"], div_data["previous_year_percent"]
+    
+
+    def get_market_stats(self):
+        try:
+            req = requests.get(self.current_market_stat_address)
+            mquote = req.json()
+            return mquote
+        except Exception as e:
+            st.error(e)
+
+    def get_current_equity_data(self):
+        stock = st.session_state["stock_on_view"]
+        return self.get_market_stats()['stock']

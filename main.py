@@ -7,6 +7,9 @@ if __name__ == "__main__":
 
     A = UI()
     A.introduction()
-    A.profile_view()
 
+    #in sidebar
+    with st.sidebar:
+        A.profile_view()
+    
     A.section_body1()
