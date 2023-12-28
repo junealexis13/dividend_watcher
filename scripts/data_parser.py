@@ -26,10 +26,28 @@ class StockData:
         elem = soup.find( "div", {"id": "MAIN_BODY"})
         data = elem.find_all("td")
 
-        #Get 
+        #Get Percentage
+        get_labels = soup.find_all("label")
+
+        previous_percentage = get_labels[1].text
+        loc_str_prcent = re.search(r'\d+\.\d+%', previous_percentage)
+
+        if loc_str_prcent:
+            percent_prev = loc_str_prcent.group()
+        else:
+            raise Dividend_Data_Error
+
+        #Get current Price
+        curr_price = get_labels[0].text
+        loc_str_price = re.search(r'\d+\.\d+', curr_price)
+
+        if loc_str_price:
+            curr_prce_pershare = loc_str_price.group()
+        else:
+            raise Dividend_Data_Error
+
 
         #Take note that the data structure was identified as [Year,Dividend Type,Rate,Ex-Dividend Date,Record Date,Payment Date]
-        
         #check first if the data is divisible by 6
 
         if len(data)%6==0:
@@ -41,10 +59,10 @@ class StockData:
             raise Data_Structure_Error()
 
         if len(self.temp_data) > 0:
-            return {"stock_code" : stock_code, "div_data": self.temp_data}
+            return {"stock_code" : stock_code, "curr_price": curr_prce_pershare, "previous_year_percent": percent_prev, "div_data": self.temp_data}
         elif len(self.temp_data) == 0:
             raise Dividend_Data_Error()
-        
+
 
     def pack_dividend_data(self, stock_code):
         div_data = self.get_dividend_data(stock_code=stock_code)
@@ -56,4 +74,4 @@ class StockData:
         prev_div_data = dft.loc[(dft["Year"] == str(self.current_datetime.year - 1)) & (dft["Type"] == "Cash")]
         prev_total_div = sum([float(re.sub(r'[^\d.]', '', x)) for x in prev_div_data["Rate"]])
 
-        return current_total_div, prev_total_div
+        return current_total_div, prev_total_div, div_data["curr_price"], div_data["previous_year_percent"]

@@ -22,12 +22,15 @@ class UI:
         #iterate through cols created
         try:
             #Fetch the info in PD Form
-            curr, prev = self.DATA.pack_dividend_data(ticker_name)
+            curr, prev, curr_price, prev_percent = self.DATA.pack_dividend_data(ticker_name)
             delta_value = curr - prev
             with cols[0]:
                 st.metric(f"DV YLD ({str(self.current_datetime.year)}) ",f"₱{round(curr,2)}/s", delta = round(delta_value, 2))
                 st.markdown(f"<p style ='font-size:0.75rem;'>₱ {round(prev,2)}/s ({str(self.current_datetime.year-1)})</p>", unsafe_allow_html=True)
 
+            with cols[1]:
+                st.metric(f"%YLD to Date",f"{round(curr/(float(curr_price.strip('%')))*100,2)}%", f"{round(curr/(float(curr_price.strip('%')))*100 - float(prev_percent.strip('%')),2)}%")
+                st.markdown(f"<p style ='font-size:0.75rem;'>{prev_percent} ({str(self.current_datetime.year-1)})</p>", unsafe_allow_html=True)
         except Dividend_Data_Error:
             st.error("Recently added stocks does not have a Dividend Data. Consider other dividend stocks.")
 
@@ -64,7 +67,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
             with col2:
                 if not st.session_state['logged-in']:
-                    st.markdown('<p style="font-size:2rem; font-family:Fantasy;">Logged in as: <span style="color:#ffde59; font-size:2.2rem; font-family:Fantasy;">GUEST</span></p>', unsafe_allow_html=True)
+                    st.markdown('<p style="font-size:2rem; font-family:Arial;">Logged in as: <span style="color:#ffde59; font-size:2.2rem; font-family:Arial;">GUEST</span></p>', unsafe_allow_html=True)
                     st.caption("Login or register an account.")
                 else:
                     st.header("*VIEWING THE PROFILE IF LOGGED IN*")
@@ -91,7 +94,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             try:
                 stocks = self.custom_selection()            
                 with st.container(border=True):
-                    st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Fantasy;"> {stocks} - {self.TOML.get_company_name(stocks)[0]}</p>''', unsafe_allow_html=True)
+                    st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)[0]}</p>''', unsafe_allow_html=True)
                     self.create_columns(stocks)
             except TypeError as e:
-                st.error(f'Error message. {e}')
+                st.info(f'Choose stock to view') 
