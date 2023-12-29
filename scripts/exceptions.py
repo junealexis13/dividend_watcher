@@ -23,9 +23,15 @@ class Edit_Mode_Error(Exception):
 
         super().__init__(self.message)
 
-
 class Company_Info_Error(Exception):
     def __init__(self, company_name, message = "Company Info you passed seems to be absent from the PSE Listed Companies. Check your input and try again.") -> None:
         self.message = f"Problem with INPUT -'{company_name}':" + message
+
+        super().__init__(self.message)
+
+
+class Equity_Data_Error(Exception):
+    def __init__(self, company_name, message = "There are errors gathering the equity data. Check ticker symbol and try again.") -> None:
+        self.message = message
 
         super().__init__(self.message)

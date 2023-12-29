@@ -12,4 +12,10 @@ if __name__ == "__main__":
     with st.sidebar:
         A.profile_view()
     
-    A.section_body1()
+    dividend_screener, current_equity = st.tabs(["Screener", "Equity"])
+    
+    with dividend_screener:
+        A.section_body1()
+
+    with current_equity:
+        st.write("Equity Stats will show here... but not now.")

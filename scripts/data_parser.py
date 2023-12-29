@@ -56,7 +56,7 @@ class StockData:
         if len(data)%6==0:
             for i, div_data in enumerate(data):
                 if i%6==0:
-                    self.temp_data[len(self.temp_data) + 1] = [x.text.strip("<td>/") for x in data[i:i+6]]
+                    self.temp_data[len(self.temp_data) + 1] = [re.sub(r'\.(.*?)\.', r'.\1', x.text.strip("<td>/"))  for x in data[i:i+6]]
         else:
             raise Data_Structure_Error
 
@@ -85,12 +85,16 @@ class StockData:
             mquote = req.json()
             return mquote
         except Exception as e:
-            st.error(e)
+            raise Equity_Data_Error(None)
 
     def get_stock_stats(self, ticker_name):
         try:
-            req = requests.get(self.current_stock_stat_address + f"{ticker_name}.json")
-            mquote = req.json()
-            return mquote
+            if ticker_name is not None:
+                req = requests.get(self.current_stock_stat_address + f"{ticker_name}.json")
+                print(req.status_code)
+                mquote = req.json()
+                return mquote
+            else:
+                return None
         except Exception as e:
-            st.error(e)
+            raise Equity_Data_Error(ticker_name)

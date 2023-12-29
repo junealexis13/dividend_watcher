@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import threading
 from datetime import datetime
 from scripts.configs import TOML
 from scripts.data_parser import StockData
@@ -15,8 +16,11 @@ class UI:
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
         
-
+    def load_equity_data(self):
         self.PSE_stats = self.DATA.get_stock_stats(st.session_state['stock_on_view']) 
+        data_stock = self.PSE_stats['stock'][0]
+        st.metric("Current Equity Data",f"₱{data_stock['price']['amount']}",f"{data_stock['percent_change']}%")
+        st.markdown(f"<p style ='font-size:0.75rem;'>Latest Vol. {int(data_stock['volume']):,}</p>", unsafe_allow_html=True)
 
     def create_columns(self, ticker_name):
         #create cols
@@ -37,10 +41,12 @@ class UI:
                 st.markdown(f"<p style ='font-size:0.75rem;'>{prev_percent} ({str(self.current_datetime.year-1)})</p>", unsafe_allow_html=True)
 
             with cols[2]:
-                if st.session_state["stock_on_view"] is not None:
-                    data_stock = self.PSE_stats['stock'][0]
-                    st.metric("Current Equity Data",f"₱{data_stock['price']['amount']}",f"{data_stock['percent_change']}%")
-                    st.markdown(f"<p style ='font-size:0.75rem;'>Latest Vol. {int(data_stock['volume']):,}</p>", unsafe_allow_html=True)
+                if ticker_name is not None:
+                    with st.spinner("Fetching Data..."):
+                        req = threading.Thread(target=self.load_equity_data())
+                        req.start()
+                        req.join()
+
 
         except Dividend_Data_Error as e:
             st.error(f"{ticker_name} does not have an updated Dividend Data. Consider other dividend stocks.")
@@ -59,8 +65,7 @@ class UI:
         st.markdown("<p style='font-align:justify;'>Showing More Dividend Information</p>",unsafe_allow_html=True)
         st.table(df)
         st.write(f"<p style ='font-size:0.75rem;'>Data from: <a href='www.pesobility.com'>www.pesobility.com",unsafe_allow_html=True )
-            
-    
+             
     def introduction(self):
         st.caption('''<!DOCTYPE html>
 <html>
@@ -95,8 +100,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         if not st.session_state["logged-in"]:
             stockPick = st.selectbox(
                     'Choose what Dividend Stock to View',
-                    self.TOML.get_PSE_list(),
-                    index=None,
+                    self.TOML.get_PSE_list(),index=None,
                     help='Choose what Dividend Stock to show. Make sure the stock ticker is valid.')
             
             st.session_state['stock_on_view'] = stockPick
@@ -123,14 +127,20 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 stocks = self.custom_selection()
                 with st.sidebar:
                     st.header(":gear: Additional Settings")
-                    show_div_data = st.checkbox("Show Dividend Data", value=True)
-                    show_all_dividend_data = st.checkbox("Show Addl. Dividend Data", value=False)
 
-                if show_div_data:           
+                    if stocks is None:
+                        disable=True
+                    elif stocks is not None:
+                        disable=False
+
+                    show_div_data = st.checkbox("Show Dividend Data", value=True, disabled=disable)
+                    show_all_dividend_data = st.checkbox("Show Addl. Dividend Data", disabled=disable)
+
+                if show_div_data and st.session_state['stock_on_view'] is not None:           
                     with st.container(border=True):
                         st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)[0]}</p>''', unsafe_allow_html=True)
                         self.create_columns(stocks)
-                if show_all_dividend_data:
+                if show_all_dividend_data and st.session_state['stock_on_view'] is not None:
                     with st.container(border=True):
                         self.view_all_dividend_info(stocks)
 
@@ -148,3 +158,14 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 #The error notice was handled inside the first container
                 st.session_state["error_message"] = e
                 pass
+
+
+            except Equity_Data_Error(st.session_state["stock_on_view"]) as e:
+                    #exception handled
+                    # st.warning("There are errors gathering equity data")
+                    pass
+            
+
+            with st.sidebar:
+                with st.container(border=True):
+                    st.write(st.session_state['error_message'])
