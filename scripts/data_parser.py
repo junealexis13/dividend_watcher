@@ -78,20 +78,10 @@ class StockData:
 
         return current_total_div, prev_total_div, div_data["curr_price"], div_data["previous_year_percent"]
     
-
-    def get_market_stats(self):
-        try:
-            req = requests.get(self.current_market_stat_address)
-            mquote = req.json()
-            return mquote
-        except Exception as e:
-            raise Equity_Data_Error(None)
-
     def get_stock_stats(self, ticker_name):
         try:
             if ticker_name is not None:
                 req = requests.get(self.current_stock_stat_address + f"{ticker_name}.json")
-                print(req.status_code)
                 mquote = req.json()
                 return mquote
             else:

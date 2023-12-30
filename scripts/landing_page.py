@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import threading
+import toml, requests
 from datetime import datetime
 from scripts.configs import TOML
 from scripts.data_parser import StockData
@@ -10,9 +11,9 @@ from scripts.exceptions import *
 class UI:
     def __init__(self) -> None:
         #instantiate configs
+        self.SessionStates = STATE()
         self.TOML = TOML()
         self.DATA = StockData()
-        self.SessionStates = STATE()
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
         
@@ -115,10 +116,14 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             st.session_state['stock_on_view'] = stockPick
 
             return stockPicks
-        
+
     def pre_section_body1(self):
         st.divider()
         st.image("resources\dividend_watch2.png", use_column_width=True)
+
+    def pre_section_body2(self):
+        st.divider()
+        st.image("resources\equity_header.png", use_column_width=True)
 
     def section_body1(self):
         if not st.session_state["logged-in"]:
@@ -165,7 +170,68 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     # st.warning("There are errors gathering equity data")
                     pass
             
+    def section_body2(self):
+        obj = Section_Objects()
 
-            with st.sidebar:
-                with st.container(border=True):
-                    st.write(st.session_state['error_message'])
+        self.pre_section_body2()
+        #Stock Picks section
+        for picks in obj.fetch_stockpicks():
+            obj.create_equity_card(picks)
+
+
+
+class Section_Objects:
+    def __init__(self) -> None:
+        #Fetch recent market data
+        self.DATA = StockData()
+        self.TOML = TOML()
+
+    def fetch_stockpicks(self):
+        if st.session_state["logged-in"]:
+            with open("user_cookies.toml", "r") as rd :
+                load_cookies = toml.load(rd)
+                rd.close()
+            return load_cookies["stockPicks"]
+        
+        else:
+            stock_picks = st.multiselect("Select stocks to view",self.TOML.get_PSE_list(), max_selections=8)
+            return stock_picks
+        
+
+    def create_equity_card(self, ticker_symbol):
+        @st.cache_data
+        def get_market_stats():
+            req = requests.get("https://phisix-api2.appspot.com/stocks.json")
+            mquote = req.json()
+            return mquote
+        
+        with st.container(border=True):
+            st.markdown(f'''<p style="font-size: 1rem; text-align: center; font-family: Arial;">{self.TOML.get_company_name(ticker_symbol)[0]}</p>''', unsafe_allow_html=True)
+            col1,col2 = st.columns([.4,.6])
+            with col1:
+                for search_eqt in get_market_stats()['stock']:
+                    if ticker_symbol.upper() == search_eqt['symbol']:
+                        st.markdown('''<html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page Title</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@100;200;300;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply the font to the <p> tag */
+        #price {
+        font-family: 'IBM Plex Sans Thai Looped', sans-serif; font-weight: 700; font-size: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+  <p id="price">%price%</p>
+
+</body>
+</html>
+
+                                    '''.replace("%price%",f"₱{search_eqt['price']['amount']}"), unsafe_allow_html=True)
+                        break
