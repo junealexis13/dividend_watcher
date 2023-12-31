@@ -6,11 +6,13 @@ if __name__ == "__main__":
     st.image("resources/dividend_header2.png")
 
     A = UI()
+    B = STATE()
     A.introduction()
 
     #in sidebar
     with st.sidebar:
         A.profile_view()
+        B._dev_toggle_login_state()
 
         with st.expander("debug message"):
             st.write(st.session_state['error_message'])

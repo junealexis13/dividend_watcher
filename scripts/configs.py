@@ -27,12 +27,17 @@ class TOML:
     def get_stockpicks(self) -> str:
         return self.config_load()['stockPicks']
     
-    def get_company_name(self, ticker_symbol):
+    def get_company_name(self, ticker_symbol, truncate=False, max_len=20):
         try:
             df = self.get_PSE_list("all")
             comp_name = df.loc[df["symbol"] == ticker_symbol.upper()]
-            return comp_name["company_name"].values
-        
+            comp_full_name = comp_name["company_name"].values
+
+            if not truncate:
+                return comp_full_name[0]
+            else:
+                return comp_full_name[0][:max_len] + "..." if len(comp_full_name[0]) > max_len else comp_full_name[0]
+
         except AttributeError:
             print("Empty Input")
         

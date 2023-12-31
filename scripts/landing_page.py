@@ -115,7 +115,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     help='Choose what Stock Dividends to show')
             st.session_state['stock_on_view'] = stockPick
 
-            return stockPicks
+            return stockPick
 
     def pre_section_body1(self):
         st.divider()
@@ -164,7 +164,6 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 st.session_state["error_message"] = e
                 pass
 
-
             except Equity_Data_Error(st.session_state["stock_on_view"]) as e:
                     #exception handled
                     # st.warning("There are errors gathering equity data")
@@ -172,13 +171,27 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             
     def section_body2(self):
         obj = Section_Objects()
-
         self.pre_section_body2()
-        #Stock Picks section
-        for picks in obj.fetch_stockpicks():
-            obj.create_equity_card(picks)
+
+        #Stock picks section
+        st.divider()
+        st.markdown(f"<h1 style='text-align: center;padding-top: 0;'> Watchlist</h1>", unsafe_allow_html=True)
+        if not st.session_state['logged-in']:
+            st.caption("<p style='text-align: center;padding: 0;'>You are not logged in. Register an account and see your favorite stocks here.</p>", unsafe_allow_html=True)
+        elif st.session_state['logged-in']:
+            stockPicks = obj.fetch_stockpicks(typeOut='sp')
+            obj.create_watchlist(len(stockPicks)//3,len(stockPicks)%3,stockPicks, typeOut="sp")
+        st.divider()
+
+        #View Active Stocks section
+        st.markdown(f"<h1 style='text-align: center;padding-top: 0;'> Equity Viewer</h1>", unsafe_allow_html=True)
+        activePicks = obj.fetch_stockpicks(typeOut="ac") #typeOut reflects the type of fetch_ command
+
+        obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
 
 
+
+        
 
 class Section_Objects:
     def __init__(self) -> None:
@@ -186,19 +199,22 @@ class Section_Objects:
         self.DATA = StockData()
         self.TOML = TOML()
 
-    def fetch_stockpicks(self):
-        if st.session_state["logged-in"]:
+    def fetch_stockpicks(self, typeOut="sp"):
+        if typeOut.lower() == 'sp':
             with open("user_cookies.toml", "r") as rd :
                 load_cookies = toml.load(rd)
                 rd.close()
             return load_cookies["stockPicks"]
         
-        else:
-            stock_picks = st.multiselect("Select stocks to view",self.TOML.get_PSE_list(), max_selections=8)
+        if typeOut.lower() == 'ac':
+            stock_picks = st.multiselect("Select multiple stocks to view",self.TOML.get_PSE_list(), max_selections=9, help="You can select up to 9 stocks at the same time.")
             return stock_picks
         
+    def create_cols(self, length):
+        cols = st.columns(length)
+        return cols
 
-    def create_equity_card(self, ticker_symbol):
+    def create_equity_card(self, ticker_symbol, idTag=None):
         @st.cache_data
         def get_market_stats():
             req = requests.get("https://phisix-api2.appspot.com/stocks.json")
@@ -206,12 +222,19 @@ class Section_Objects:
             return mquote
         
         with st.container(border=True):
-            st.markdown(f'''<p style="font-size: 1rem; text-align: center; font-family: Arial;">{self.TOML.get_company_name(ticker_symbol)[0]}</p>''', unsafe_allow_html=True)
-            col1,col2 = st.columns([.4,.6])
-            with col1:
-                for search_eqt in get_market_stats()['stock']:
-                    if ticker_symbol.upper() == search_eqt['symbol']:
-                        st.markdown('''<html>
+            name = self.TOML.get_company_name(ticker_symbol, truncate=True, max_len = 22)
+            st.markdown(f'''<p style="font-size: 0.75vw; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+
+            for search_eqt in get_market_stats()['stock']:
+                if ticker_symbol.upper() == search_eqt['symbol']:
+                    if search_eqt['percent_change'] > 0:
+                        ticker_color = "#1eedd1"
+                    elif search_eqt['percent_change'] < 0:
+                        ticker_color = "#ff4d4d"
+                    elif search_eqt['percent_change'] == 0:
+                        ticker_color = "#d9d9d9"
+                    
+                    st.markdown('''<html>
 <!DOCTYPE html>
 <html>
 <head>
@@ -220,18 +243,72 @@ class Section_Objects:
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@100;200;300;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Apply the font to the <p> tag */
         #price {
-        font-family: 'IBM Plex Sans Thai Looped', sans-serif; font-weight: 700; font-size: 3rem;
+            font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+            font-weight: 700;
+            font-size: 2vw;
+            text-align: center;
+            margin-bottom: 1px; /* Adjust the margin between paragraphs */
         }
+        
+        #change {
+            font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+            font-weight: 500;
+            font-size: 1vw;
+            text-align: center;
+            margin-top: 1px; /* Adjust the margin between paragraphs */
+            color: *tick_color*;
+        }
+                                
+        #ticker_[ticker_tag] {
+            font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+            padding: 0;
+            text-align: center;
+            color: [ticker_color];
+            font-weight:500;
+        }
+
     </style>
 </head>
 <body>
-
-  <p id="price">%price%</p>
-
+    <p id="price">%price%</p>
+    <p id="ticker_[ticker_tag]">%percent_change%</p>                        
 </body>
 </html>
 
-                                    '''.replace("%price%",f"₱{search_eqt['price']['amount']}"), unsafe_allow_html=True)
-                        break
+                                '''.replace("%price%",f"₱{search_eqt['price']['amount']}").replace("%percent_change%",f"{search_eqt['percent_change']}%").replace("[ticker_tag]",f"{idTag}").replace("[ticker_color]", ticker_color),unsafe_allow_html=True)
+                    break
+                
+    def create_watchlist(self, full_rows, partial_rows, stockpicks, typeOut=None):
+            '''
+            Pass row specs and stockpicks to create watchlist grid
+            '''
+            match full_rows, partial_rows:
+                case full_rows, 0:
+                    for i in range(full_rows):
+                        cols = self.create_cols(3)
+                        for n, col in enumerate(cols):
+                            with col:
+                                if typeOut.lower() == "sp":
+                                    self.create_equity_card(stockpicks[i*3+n],idTag=f"sp{i*3+n}")
+                                elif typeOut.lower() == "ac":
+                                    self.create_equity_card(stockpicks[i*3+n],idTag=f"ac{i*3+n}")
+                case full_rows, partial_rows if partial_rows > 0:
+                    #fetch full rows
+                    for i in range(full_rows):
+                        cols = self.create_cols(3)
+                        for n, col in enumerate(cols):
+                            with col:
+                                if typeOut.lower() == "sp":
+                                    self.create_equity_card(stockpicks[i*3+n],idTag=f"sp{i*3+n}")
+                                elif typeOut.lower() == "ac":
+                                    self.create_equity_card(stockpicks[i*3+n],idTag=f"ac{i*3+n}")
+                    
+                    #Fetch the last rows which was incomplete
+                    part_cols = self.create_cols(partial_rows)
+                    for n, col in enumerate(part_cols):
+                        with col:
+                            if typeOut.lower() == "sp":
+                                self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"sp{full_rows*3+n}")
+                            elif typeOut.lower() == "ac":
+                                self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"ac{full_rows*3+n}")

@@ -14,3 +14,11 @@ class STATE:
 
         if "error_message" not in st.session_state:
             st.session_state["error_message"] = None
+
+    def _dev_toggle_login_state(self):
+        toggle = st.checkbox('Enable logged-in state.',value = st.session_state['logged-in'])
+        if toggle:
+            st.session_state['logged-in'] = True
+        else:
+            st.session_state['logged-in'] = False
+        st.write(st.session_state['logged-in'])
