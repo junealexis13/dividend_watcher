@@ -25,20 +25,13 @@ class StockData:
         a = requests.get(self.div_address + f"/{stock_code.upper()}", headers=self.url_headers)
         soup = BeautifulSoup(a.content, 'lxml')
 
+
         #Get Main Data
         elem = soup.find( "div", {"id": "MAIN_BODY"})
         data = elem.find_all("td")
 
         #Get Percentage
         get_labels = soup.find_all("label")
-
-        previous_percentage = get_labels[1].text
-        loc_str_prcent = re.search(r'\d+(\.\d+)?%', previous_percentage)
-
-        if loc_str_prcent:
-            percent_prev = loc_str_prcent.group()
-        else:
-            raise Dividend_Data_Error(message="DDE1.1")
 
         #Get current Price
         curr_price = get_labels[0].text
@@ -61,7 +54,7 @@ class StockData:
             raise Data_Structure_Error
 
         if len(self.temp_data) > 0:
-            return {"stock_code" : stock_code, "curr_price": curr_prce_pershare, "previous_year_percent": percent_prev, "div_data": self.temp_data}
+            return {"stock_code" : stock_code, "curr_price": curr_prce_pershare, "div_data": self.temp_data}
         elif len(self.temp_data) == 0:
             raise Dividend_Data_Error(message='DDE1.3')
 
@@ -70,13 +63,21 @@ class StockData:
         div_data = self.get_dividend_data(stock_code=stock_code)
         dft = pd.DataFrame.from_dict(div_data["div_data"],orient="index", columns=['Year','Type','Rate','ExDate','RecordDate','PaymentDate'])
 
-        current_div_data = dft.loc[(dft["Year"] == str(self.current_datetime.year)) & (dft["Type"] == "Cash")]
+        if self.current_datetime.year not in dft['Year'].unique():
+            _year = self.current_datetime.year - 1
+            _prev_year = self.current_datetime.year - 2
+        else:
+            _year = self.current_datetime.year
+            _prev_year = self.current_datetime.year - 1
+            
+        current_div_data = dft.loc[(dft["Year"] == str(_year)) & (dft["Type"] == "Cash")]
         current_total_div = sum([float(re.sub(r'[^\d.]', '', x)) for x in current_div_data["Rate"]])
 
-        prev_div_data = dft.loc[(dft["Year"] == str(self.current_datetime.year - 1)) & (dft["Type"] == "Cash")]
+        prev_div_data = dft.loc[(dft["Year"] == str(_prev_year)) & (dft["Type"] == "Cash")]
         prev_total_div = sum([float(re.sub(r'[^\d.]', '', x)) for x in prev_div_data["Rate"]])
-
-        return current_total_div, prev_total_div, div_data["curr_price"], div_data["previous_year_percent"]
+        prev_percent =  round(prev_total_div / float(div_data["curr_price"]),3)
+        
+        return current_total_div, prev_total_div, div_data["curr_price"], prev_percent, _year
     
     def get_stock_stats(self, ticker_name):
         try:

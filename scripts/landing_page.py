@@ -31,15 +31,26 @@ class UI:
         #iterate through cols created
         try:
             #Fetch the info in PD Form
-            curr, prev, curr_price, prev_percent = self.DATA.pack_dividend_data(ticker_name)
+            curr, prev, curr_price, prev_percent, yr = self.DATA.pack_dividend_data(ticker_name)
             delta_value = curr - prev
+
+            #Create year variables
+            if yr != str(self.current_datetime.year):
+                _year = self.current_datetime.year - 1
+                _prev_year = self.current_datetime.year -2
+            else:
+                _year = self.current_datetime.year
+                _prev_year = self.current_datetime.year - 1
+
+
             with cols[0]:
-                st.metric(f"DV YLD ({str(self.current_datetime.year)}) ",f"₱{round(curr,2)}/s", delta = round(delta_value, 2))
-                st.markdown(f"<p style ='font-size:0.75rem;'>₱ {round(prev,2)}/s ({str(self.current_datetime.year-1)})</p>", unsafe_allow_html=True)
+                st.metric(f"DV YLD ({str(_year)}) ",f"₱{round(curr,2)}/s", delta = round(delta_value, 2))
+                st.markdown(f"<p style ='font-size:0.75rem;'>₱ {round(prev,2)}/s ({str(_prev_year)})</p>", unsafe_allow_html=True)
 
             with cols[1]:
-                st.metric(f"%YLD to Date",f"{round(curr/(float(curr_price.strip('%')))*100,2)}%", f"{round(curr/(float(curr_price.strip('%')))*100 - float(prev_percent.strip('%')),2)}%")
-                st.markdown(f"<p style ='font-size:0.75rem;'>{prev_percent} ({str(self.current_datetime.year-1)})</p>", unsafe_allow_html=True)
+                st.metric(f"%YLD to Date",f"{round(curr/(float(curr_price.strip('%')))*100,2)}%", f"{round((curr/(float(curr_price.strip('%'))))*100 - (prev_percent*100),2)}%")
+                st.markdown(f"<p style ='font-size:0.75rem;'>{prev_percent*100}% ({str(_prev_year)})</p>", unsafe_allow_html=True)
+
 
             with cols[2]:
                 if ticker_name is not None:
@@ -143,7 +154,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
                 if show_div_data and st.session_state['stock_on_view'] is not None:           
                     with st.container(border=True):
-                        st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)[0]}</p>''', unsafe_allow_html=True)
+                        st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)}</p>''', unsafe_allow_html=True)
                         self.create_columns(stocks)
                 if show_all_dividend_data and st.session_state['stock_on_view'] is not None:
                     with st.container(border=True):
@@ -189,9 +200,6 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
         obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
 
-
-
-        
 
 class Section_Objects:
     def __init__(self) -> None:
