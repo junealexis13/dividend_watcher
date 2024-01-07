@@ -4,3 +4,4 @@ Requests==2.31.0
 streamlit==1.29.0
 toml==0.10.2
 Pillow==10.2.0
+lxml==4.9.4
