@@ -175,7 +175,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 st.session_state["error_message"] = e
                 pass
 
-            except Equity_Data_Error(st.session_state["stock_on_view"]) as e:
+            except Equity_Data_Error as e:
                     #exception handled
                     # st.warning("There are errors gathering equity data")
                     pass
