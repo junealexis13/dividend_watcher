@@ -100,7 +100,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         with st.container(border=True):
             col1, col2 = st.columns([0.2, 0.8])
             with col1:
-                st.image(os.path.join(os.getcwd(),"resources","user.png"), use_column_width = True)
+                st.image(os.path.join("resources","user.png"), use_column_width = True, caption='user')
 
             with col2:
                 if not st.session_state['logged-in']:
