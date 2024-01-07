@@ -18,6 +18,13 @@ class UI:
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
         
+    def login_ui(self):
+        with st.container(border=True):
+            st.markdown("<p style='color: black;'>Account Login</p>", unsafe_allow_html=True)
+            user_login = st.text_input(label="user",type="default")
+            user_pass = st.text_input(label="password",type="password")
+            return user_login, user_pass
+        
     def load_equity_data(self):
         self.PSE_stats = self.DATA.get_stock_stats(st.session_state['stock_on_view']) 
         data_stock = self.PSE_stats['stock'][0]
@@ -110,24 +117,14 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     st.header("*VIEWING THE PROFILE IF LOGGED IN*")
 
     def custom_selection(self):
-        if not st.session_state["logged-in"]:
-            stockPick = st.selectbox(
-                    'Choose what Dividend Stock to View',
-                    self.TOML.get_PSE_list(),index=None,
-                    help='Choose what Dividend Stock to show. Make sure the stock ticker is valid.')
-            
-            st.session_state['stock_on_view'] = stockPick
-            return stockPick
+        stockPick = st.selectbox(
+                'Choose what Dividend Stock to View',
+                self.TOML.get_PSE_list(),index=None,
+                help='Choose what Dividend Stock to show. Make sure the stock ticker is valid.')
         
-        else:
-            stockPick = st.multiselect(
-                    'View Annual Dividend Data',
-                    self.TOML.get_PSE_list(),
-                    self.TOML.get_stockpicks(), max_selections= 5,
-                    help='Choose what Stock Dividends to show')
-            st.session_state['stock_on_view'] = stockPick
+        st.session_state['stock_on_view'] = stockPick
+        return stockPick
 
-            return stockPick
 
     def pre_section_body1(self):
         st.divider()
@@ -138,48 +135,48 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         st.image(os.path.join("resources","equity_header.png"), use_column_width=True)
 
     def section_body1(self):
-        if not st.session_state["logged-in"]:
-            try:
-                self.pre_section_body1()
-                stocks = self.custom_selection()
-                with st.sidebar:
-                    st.header(":gear: Additional Settings")
+        try:
+            self.pre_section_body1()
+            stocks = self.custom_selection()
 
-                    if stocks is None:
-                        disable=True
-                    elif stocks is not None:
-                        disable=False
+            with st.sidebar:
+                st.header(":gear: Additional Settings")
 
-                    show_div_data = st.checkbox("Show Dividend Data", value=True, disabled=disable)
-                    show_all_dividend_data = st.checkbox("Show Addl. Dividend Data", disabled=disable)
+                if stocks is None:
+                    disable=True
+                elif stocks is not None:
+                    disable=False
 
-                if show_div_data and st.session_state['stock_on_view'] is not None:           
-                    with st.container(border=True):
-                        st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)}</p>''', unsafe_allow_html=True)
-                        self.create_columns(stocks)
-                if show_all_dividend_data and st.session_state['stock_on_view'] is not None:
-                    with st.container(border=True):
-                        self.view_all_dividend_info(stocks)
+                show_div_data = st.checkbox("Show Dividend Data", value=True, disabled=disable)
+                show_all_dividend_data = st.checkbox("Show Addl. Dividend Data", disabled=disable)
 
-            except TypeError as e:
-                st.info(f'Choose stock to view') 
-                st.session_state["error_message"] = e
+            if show_div_data and st.session_state['stock_on_view'] is not None:           
+                with st.container(border=True):
+                    st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;"> {stocks} - {self.TOML.get_company_name(stocks)}</p>''', unsafe_allow_html=True)
+                    self.create_columns(stocks)
+            if show_all_dividend_data and st.session_state['stock_on_view'] is not None:
+                with st.container(border=True):
+                    self.view_all_dividend_info(stocks)
 
-            except ValueError as e:
-                #Problems with some pref shares values
-                st.error("A persisting error with Preferred Shares are still being fixed.")
-                st.info("Consider other dividend stocks.")
-                st.session_state["error_message"] = e
+        except TypeError as e:
+            st.info(f'Choose stock to view') 
+            st.session_state["error_message"] = e
 
-            except Dividend_Data_Error as e:
-                #The error notice was handled inside the first container
-                st.session_state["error_message"] = e
+        except ValueError as e:
+            #Problems with some pref shares values
+            st.error("A persisting error with Preferred Shares are still being fixed.")
+            st.info("Consider other dividend stocks.")
+            st.session_state["error_message"] = e
+
+        except Dividend_Data_Error as e:
+            #The error notice was handled inside the first container
+            st.session_state["error_message"] = e
+            pass
+
+        except Equity_Data_Error as e:
+                #exception handled
+                # st.warning("There are errors gathering equity data")
                 pass
-
-            except Equity_Data_Error as e:
-                    #exception handled
-                    # st.warning("There are errors gathering equity data")
-                    pass
             
     def section_body2(self):
         obj = Section_Objects()
@@ -200,6 +197,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         activePicks = obj.fetch_stockpicks(typeOut="ac") #typeOut reflects the type of fetch_ command
 
         obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
+
 
 
 class Section_Objects:

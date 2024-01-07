@@ -1,3 +1,5 @@
 .venv/*
 .vscode/*
 .streamlit/secrets.toml
+scripts/__pycache__/*
+__pycache__/*

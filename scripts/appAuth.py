@@ -28,26 +28,22 @@ class SB_CLIENT:
         return res
     
     def signIn_User(self, email: str, password: str):
+        data = self.SB_Client.auth.sign_in_with_password(
+                {
+                    "email": email,
+                    "password": password
+                }
+            )
+    
+        st.session_state['logged-in'] = True
+
+        return data
+
+
+    def signOut(self):
         try:
-            data = self.SB_Client.auth.sign_in_with_password(
-                    {
-                        "email": email,
-                        "password": password
-                    }
-                )
-            return data
+            res = self.SB_Client.auth.sign_out()
+            st.session_state["logged-in"] = False
+            st.rerun()
         except Exception as e:
             st.error(e)
-
-
-if __name__ == "__main__": 
-    username = st.text_input("Username", max_chars=40,)
-    password = st.text_input("Password", max_chars=40,)
-
-
-    SB = SB_CLIENT()
-    submit = st.button('Submit')
-
-    if submit:
-        a = SB.signIn_User(username, password)
-        
