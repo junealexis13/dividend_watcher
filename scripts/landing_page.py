@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import threading
+import os
 import toml, requests
 from datetime import datetime
 from scripts.configs import TOML
@@ -99,7 +100,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         with st.container(border=True):
             col1, col2 = st.columns([0.2, 0.8])
             with col1:
-                st.image(r'resources/user.png', use_column_width = True)
+                st.image(os.path.join(os.getcwd(),"resources","user.png"), use_column_width = True)
 
             with col2:
                 if not st.session_state['logged-in']:
@@ -130,11 +131,11 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
     def pre_section_body1(self):
         st.divider()
-        st.image(r"resources\dividend_watch2.png", use_column_width=True)
+        st.image(os.path.join(os.getcwd(),"resources","dividend_watch2.png"), use_column_width=True)
 
     def pre_section_body2(self):
         st.divider()
-        st.image(r"resources\equity_header.png", use_column_width=True)
+        st.image(os.path.join(os.getcwd(),"resources","equity_header.png", use_column_width=True)
 
     def section_body1(self):
         if not st.session_state["logged-in"]:
