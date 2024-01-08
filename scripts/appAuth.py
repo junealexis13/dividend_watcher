@@ -27,7 +27,7 @@ class SB_CLIENT:
 
         return res
     
-    def signIn_User(self, email: str, password: str):
+    def signIn_User(self, email: str, password: str, *args):
         data = self.SB_Client.auth.sign_in_with_password(
                 {
                     "email": email,
@@ -38,7 +38,6 @@ class SB_CLIENT:
         st.session_state['logged-in'] = True
 
         return data
-
 
     def signOut(self):
         try:

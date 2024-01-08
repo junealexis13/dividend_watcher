@@ -1,0 +1,9 @@
+[[pages]]
+path = "main.py"
+name = "Home"
+icon = "🏠"
+
+[[pages]]
+path = "pages/login.py"
+name = "User Sign-up"
+icon = ":pencil:"

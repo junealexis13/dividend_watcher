@@ -1,4 +1,8 @@
 from scripts import *
+from st_pages import show_pages_from_config, add_page_title
+
+
+
 import os
 
 if __name__ == "__main__":
@@ -10,6 +14,11 @@ if __name__ == "__main__":
     B = STATE()
     Auth = SB_CLIENT()
     A.introduction()
+
+    show_pages_from_config()
+
+    ####UI CODES AFTER HERE####
+
 
     #in sidebar
     with st.sidebar:
