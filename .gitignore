@@ -1,4 +1,5 @@
 .venv/*
+.venv2/*
 .vscode/*
 .streamlit/secrets.toml
 scripts/__pycache__/*
