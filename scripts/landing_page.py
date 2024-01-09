@@ -240,7 +240,7 @@ class Section_Objects:
                         ticker_color = "#ff4d4d"
                     elif search_eqt['percent_change'] == 0:
                         ticker_color = "#d9d9d9"
-                    
+                    value = int(search_eqt['price']['amount']*search_eqt['volume'])
                     st.markdown('''<html>
 <!DOCTYPE html>
 <html>
@@ -265,6 +265,7 @@ class Section_Objects:
             text-align: center;
             margin-top: 1px; /* Adjust the margin between paragraphs */
             color: *tick_color*;
+            padding: 0;
         }
                                 
         #ticker_[ticker_tag] {
@@ -274,16 +275,48 @@ class Section_Objects:
             color: [ticker_color];
             font-weight:500;
         }
+                                
+        #volume_[ticker_tag] {
+            font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+            padding: 0;
+            text-align: center;
+            font-weight:200;
+            font-size: 0.65rem;
+        }
+        #divider_p {
+            font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+            padding: 0;
+            text-align: center;
+            font-weight:800;
+            font-size:0.5rem;
+        }                            
+        #value_view{
+            font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+            padding: 0;
+            text-align: center;
+            font-weight:400;
+            font-size: 0.75rem;
+        }
+        .reduce_margin{
+            margin-bottom: 0;
+        }            
+
 
     </style>
 </head>
 <body>
-    <p id="price">%price%</p>
-    <p id="ticker_[ticker_tag]">%percent_change%</p>                        
+    <div class="cont">
+        <p id="price">%price%</p>
+        <p id="ticker_[ticker_tag]">%percent_change%</p>
+        <p id="divider_p" class="reduce_margin">Intra-day Volume & Value</p>
+        <p id="value_view" class="reduce_margin"><b>%value%</b></p>     
+        <p id="volume_[ticker_tag]" class="reduce_margin"><b>%volume%</b> [symbol]</p>
+    </div>
+                   
 </body>
 </html>
 
-                                '''.replace("%price%",f"₱{search_eqt['price']['amount']}").replace("%percent_change%",f"{search_eqt['percent_change']}%").replace("[ticker_tag]",f"{idTag}").replace("[ticker_color]", ticker_color),unsafe_allow_html=True)
+                                '''.replace("[symbol]",ticker_symbol.upper()).replace("%price%",f"₱{search_eqt['price']['amount']}").replace("%value%",f"₱{value:,}").replace("%percent_change%",f"{search_eqt['percent_change']}%").replace("%volume%",f"{int(search_eqt['volume']):,}").replace("[ticker_tag]",f"{idTag}").replace("[ticker_color]", ticker_color),unsafe_allow_html=True)
                     break
                 
     def create_watchlist(self, full_rows, partial_rows, stockpicks, typeOut=None):

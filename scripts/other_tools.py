@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-import os, re
+import os, re, datetime
 
 class ADDRESS_TOOLS:
     def __init__(self) -> None:
@@ -21,3 +21,28 @@ class ADDRESS_TOOLS:
         indexed_brgy = self.add_index.loc[self.add_index["adm3"] == index_city_muni]
         return list(indexed_brgy["adm4"].unique())
     
+class USER_INFO_MNGR:
+    def __init__(self, fname, lname, reg, prov, citymuni, brgy, bday: datetime.date, gender) -> None:
+        self.fname = fname
+        self.lname = lname
+        self.reg = reg
+        self.prov = prov
+        self.citymuni = citymuni
+        self.brgy = brgy
+        self.bday = str(bday)
+        self.gender = gender
+
+    def pack_data(self):
+        return {
+            "first_name"    : self.fname,
+            "last_name"     : self.lname,
+            "add_reg"       : self.reg,
+            "add_prov"      : self.prov,
+            "add_citymuni"  : self.citymuni,
+            "add_brgy"      : self.brgy,
+            "bday"          : self.bday,
+            "gender"        : self.gender
+        }
+    
+    def get_full_address(self):
+        return f"{self.brgy}, {self.citymuni}, {self.prov}, {self.reg}"

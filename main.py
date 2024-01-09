@@ -1,6 +1,6 @@
 from scripts import *
-from st_pages import show_pages_from_config, add_page_title
-
+from st_pages import Page, add_page_title, hide_pages, show_pages
+import os
 
 
 import os
@@ -15,7 +15,10 @@ if __name__ == "__main__":
     Auth = SB_CLIENT()
     A.introduction()
 
-    show_pages_from_config()
+    show_pages([
+        Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
+        Page("main.py","Home",":home:")
+    ])
 
     ####UI CODES AFTER HERE####
 
@@ -25,6 +28,7 @@ if __name__ == "__main__":
         A.profile_view()
 
         if not st.session_state["logged-in"]:
+
                 user_login,user_pass = A.login_ui()
 
                 login = st.button("Sign in",key="login-button")
@@ -37,6 +41,7 @@ if __name__ == "__main__":
                     
                 
         elif st.session_state["logged-in"]:
+            hide_pages(["User Sign-up"])
             logout = st.button("Log out",key="logout-button")
             if logout:
                 Auth.signOut()

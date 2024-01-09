@@ -12,7 +12,7 @@ class SB_CLIENT:
         #Init Client
         self.SB_Client: Client = create_client(self.SB_URL, self.SB_KEY)
 
-    def register_User(self, email: str, password: str, *args):
+    def register_User(self, email: str, password: str, data: dict, *args):
 
         def encrypt_password(password = password):
             encrypted_pword = hashlib.sha256(password.encode()).hexdigest()
@@ -21,17 +21,19 @@ class SB_CLIENT:
         res = self.SB_Client.auth.sign_up(
             {
                 "email": email,
-                "password" : password
+                "password" : password,
+                "options": {
+                    "data": data
+                }
             }
         )
 
-        return res
     
-    def signIn_User(self, email: str, password: str, *args):
+    def signIn_User(self, email: str, password: str , *args):
         data = self.SB_Client.auth.sign_in_with_password(
                 {
                     "email": email,
-                    "password": password
+                    "password": password,
                 }
             )
     
