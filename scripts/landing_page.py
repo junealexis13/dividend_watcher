@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import threading
 import os
@@ -31,6 +32,9 @@ class UI:
         st.metric("Current Equity Data",f"₱{data_stock['price']['amount']}",f"{data_stock['percent_change']}%")
         st.markdown(f"<p style ='font-size:0.75rem;'>Latest Vol. {int(data_stock['volume']):,}</p>", unsafe_allow_html=True)
 
+    def fetch_3month_stream(self, ticker_name):
+        return self.DATA.create_historical_data(ticker_name)
+    
     def create_columns(self, ticker_name):
         #create cols
         col_nums = 3
@@ -84,7 +88,7 @@ class UI:
         df = pd.DataFrame.from_dict(self.div_data['div_data'], orient="index",columns=['Year','Type','Rate','ExDate','RecordDate','PaymentDate'])
         st.markdown("<p style='font-align:justify;'>Showing More Dividend Information</p>",unsafe_allow_html=True)
         st.table(df)
-        st.write(f"<p style ='font-size:0.75rem;'>Data from: <a href='www.pesobility.com'>www.pesobility.com",unsafe_allow_html=True )
+        st.write(f"<p style ='font-size:0.75rem;'>Data from: <a href='http://www.pesobility.com/dividends/{ticker_name.upper()}', target='_blank'>www.pesobility.com",unsafe_allow_html=True )
              
     def introduction(self):
         st.caption('''<!DOCTYPE html>
@@ -125,7 +129,6 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         st.session_state['stock_on_view'] = stockPick
         return stockPick
 
-
     def pre_section_body1(self):
         st.divider()
         st.image(os.path.join("resources","dividend_watch2.png"), use_column_width=True)
@@ -157,6 +160,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             if show_all_dividend_data and st.session_state['stock_on_view'] is not None:
                 with st.container(border=True):
                     self.view_all_dividend_info(stocks)
+                    st.write(self.fetch_3month_stream(stocks))
 
         except TypeError as e:
             st.info(f'Choose stock to view') 
@@ -197,6 +201,8 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         activePicks = obj.fetch_stockpicks(typeOut="ac") #typeOut reflects the type of fetch_ command
 
         obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
+
+
 
 
 
@@ -352,3 +358,14 @@ class Section_Objects:
                                 self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"sp{full_rows*3+n}")
                             elif typeOut.lower() == "ac":
                                 self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"ac{full_rows*3+n}")
+
+    def view_tradeview_embed(self, ticker_symbol=None):
+        if os.path.isfile(os.path.join(".","resources","tradeviewchart.html")):
+            with open(os.path.join(".","resources","tradeviewchart.html"),"r") as embeddings:
+                code = embeddings.read()
+                components.html(code,height=600,scrolling=True)
+                embeddings.close()
+
+        else:
+            st.write("embeddings not readable or file not available")
+            

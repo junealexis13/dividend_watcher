@@ -13,11 +13,14 @@ if __name__ == "__main__":
     A = UI()
     B = STATE()
     Auth = SB_CLIENT()
+    __Dev = Section_Objects()
+
     A.introduction()
 
     show_pages([
-        Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
-        Page("main.py","Home",":home:")
+        Page("main.py","Home",":house_with_garden:"),
+        Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:")
+
     ])
 
     ####UI CODES AFTER HERE####
@@ -41,13 +44,13 @@ if __name__ == "__main__":
                     
                 
         elif st.session_state["logged-in"]:
-            hide_pages(["User Sign-up"])
+            hide_pages(["User Sign-Up"])
             logout = st.button("Log out",key="logout-button")
             if logout:
                 Auth.signOut()
                         
 
-    dividend_screener, current_equity = st.tabs(["Screener", "Equity"])
+    dividend_screener, current_equity, __prototype_view = st.tabs(["Screener", "Equity", "Viewer"])
     
     with dividend_screener:
         A.section_body1()
@@ -55,5 +58,10 @@ if __name__ == "__main__":
     with current_equity:
         A.section_body2()
 
+    with __prototype_view:
+        __Dev.view_tradeview_embed()
+        
     with st.expander("debug message"):
         st.write(st.session_state['error_message'])
+
+    
