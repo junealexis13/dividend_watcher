@@ -2,13 +2,14 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import threading
-import os
-import toml, requests
+import toml, requests, os, json, requests
+import numpy as np
 from datetime import datetime
 from scripts.configs import TOML
 from scripts.data_parser import StockData
 from scripts.app_state import STATE
 from scripts.exceptions import *
+from scripts.providers import DATA_PROVIDERS
 
 class UI:
     def __init__(self) -> None:
@@ -18,6 +19,7 @@ class UI:
         self.DATA = StockData()
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
+        self.providers = DATA_PROVIDERS()
         
     def login_ui(self):
         with st.container(border=True):
@@ -202,6 +204,36 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
         obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
 
+    def section_body3(self):
+        fromdate = st.date_input("Start Date")
+        todate = st.date_input("To Date")
+        run = st.button(label="Run request")
+        
+        if run:
+            with st.spinner("Fetching all 1yr data..."):
+                PSE_LIST = self.TOML.get_PSE_list(mode="ticker")
+                progress_bar = st.progress(0, "Fetching all data...")
+                data = {}
+                for i,EQUITY in enumerate(PSE_LIST):
+                    if EQUITY != None or EQUITY is not np.nan:
+                        if not os.path.isfile(os.path.join("temp","data.json")):
+                            a = open(os.path.join("temp","data.json"),"w")
+                            a.close()
+
+                        try:
+                            req = self.providers.get_historical_prices(EQUITY.upper(),fromdate.strftime('%Y-%m-%d'), todate.strftime('%Y-%m-%d'))
+                            data[EQUITY] = req
+                        except requests.exceptions.HTTPError as e:
+                            st.session_state.error = e
+                            pass
+
+                    progress_bar.progress(int((i/len(PSE_LIST))*100),f"Getting data for: {EQUITY}")
+                progress_bar.empty()
+                
+                dumpFile = open(os.path.join("temp","data.json"), "w")
+                json.dump(data,dumpFile)
+                dumpFile.close()
+                st.write("Dumped files. Please check the DB.")
 
 
 
@@ -358,14 +390,3 @@ class Section_Objects:
                                 self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"sp{full_rows*3+n}")
                             elif typeOut.lower() == "ac":
                                 self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"ac{full_rows*3+n}")
-
-    def view_tradeview_embed(self, ticker_symbol=None):
-        if os.path.isfile(os.path.join(".","resources","tradeviewchart.html")):
-            with open(os.path.join(".","resources","tradeviewchart.html"),"r") as embeddings:
-                code = embeddings.read()
-                components.html(code,height=600,scrolling=True)
-                embeddings.close()
-
-        else:
-            st.write("embeddings not readable or file not available")
-            

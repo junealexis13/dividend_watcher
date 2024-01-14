@@ -6,3 +6,4 @@ st_pages==0.4.5
 streamlit==1.29.0
 supabase==2.3.3
 toml==0.10.2
+eod==0.2.1

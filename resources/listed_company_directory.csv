@@ -1,5 +1,5 @@
 company_name|symbol|sector_name|subsector_name|listing_date
-2GO GROUP, INC.||||May 15, 1995
+2GO GROUP, INC.| 2GO |||May 15, 1995
 8990 Holdings, Inc. Series B Perpetual Preferred Shares|8990B|PROPERTY|PROPERTY|February 10, 2021
 8990 Holdings, Inc. Series A Perpetual Preferred Shares|8990P|PROPERTY|PROPERTY|December 01, 2017
 Asia Amalgamated Holdings Corporation|AAA|HOLDING FIRMS|HOLDING FIRMS|March 22, 1973
@@ -158,7 +158,7 @@ GT Capital Holdings, Inc.|GTCAP|HOLDING FIRMS|HOLDING FIRMS|April 20, 2012
 GT Capital Holdings, Inc. Non-Voting Perpetual Preferred Shares Series ``A``|GTPPA|HOLDING FIRMS|HOLDING FIRMS|October 27, 2016
 GT Capital Holdings, Inc. Non-Voting Perpetual Preferred Shares Series ``B``|GTPPB|HOLDING FIRMS|HOLDING FIRMS|October 27, 2016
 House of Investments, Inc.|HI|HOLDING FIRMS|HOLDING FIRMS|July 02, 1962
-HOLCIM PHILIPPINES, INC.||||June 17, 1996
+HOLCIM PHILIPPINES, INC.|HLCM|||June 17, 1996
 AllHome Corp.|HOME|SERVICES|RETAIL|October 10, 2019
 8990 Holdings, Inc.|HOUSE|PROPERTY|PROPERTY|December 09, 2010
 Haus Talk, Inc.|HTI|SME|SME|January 17, 2022
@@ -247,7 +247,7 @@ Paxys, Inc.|PAX|SERVICES|OTHER SERVICES|October 05, 1972
 Philippine Business Bank, Inc., A Savings Bank|PBB|FINANCIALS|BANKS|February 19, 2013
 Philippine Bank of Communications|PBC|FINANCIALS|BANKS|May 12, 1988
 Petron Corporation|PCOR|INDUSTRIAL|ELEC., ENERGY, POWER & WATER|September 07, 1994
-PICOP RESOURCES, INC.||||October 29, 1973
+PICOP RESOURCES, INC.|PCP|||October 29, 1973
 PetroEnergy Resources Corporation|PERC|INDUSTRIAL|ELEC., ENERGY, POWER & WATER|August 11, 2004
 Puregold Price Club, Inc.|PGOLD|SERVICES|RETAIL|October 05, 2011
 Premiere Horizon Alliance Corporation|PHA|SERVICES|OTHER SERVICES|May 05, 1997
@@ -353,7 +353,7 @@ PLDT Inc. Convertible Preferred Shares Series ``II``|TLII|SERVICES|TELECOMMUNICA
 PLDT Inc. Convertible Preferred Shares Series ``JJ``|TLJJ|SERVICES|TELECOMMUNICATIONS|January 21, 2016
 Harbor Star Shipping Services, Inc.|TUGS|SERVICES|TRANSPORTATION SERVICES|October 30, 2013
 Union Bank of the Philippines|UBP|FINANCIALS|BANKS|June 29, 1992
-UNIOIL RESOURCES & HOLDINGS COMPANY, INC.||||July 27, 1987
+UNIOIL RESOURCES & HOLDINGS COMPANY, INC.|UNI|||July 27, 1987
 United Paragon Mining Corporation|UPM|MINING & OIL|MINING|August 31, 1972
 Upson International Corp.|UPSON|SERVICES|RETAIL|April 03, 2023
 Universal Robina Corporation|URC|INDUSTRIAL|FOOD, BEVERAGE & TOBACCO|March 25, 1994

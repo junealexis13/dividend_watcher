@@ -12,8 +12,10 @@ if __name__ == "__main__":
 
     A = UI()
     B = STATE()
+    C = DATA_PROVIDERS()
+    
     Auth = SB_CLIENT()
-    __Dev = Section_Objects()
+    
 
     A.introduction()
 
@@ -59,7 +61,7 @@ if __name__ == "__main__":
         A.section_body2()
 
     with __prototype_view:
-        __Dev.view_tradeview_embed()
+        A.section_body3()
         
     with st.expander("debug message"):
         st.write(st.session_state['error_message'])
