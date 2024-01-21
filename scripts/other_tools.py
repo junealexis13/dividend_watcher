@@ -3,6 +3,9 @@ import streamlit as st
 import os, re, datetime
 
 class ADDRESS_TOOLS:
+    '''
+    Manages the quick selection view and automatic update of places
+    '''
     def __init__(self) -> None:
         self.add_index = pd.read_csv(os.path.join("resources","ph_address_index.csv"), encoding='ISO-8859-1', sep=";")
 
@@ -22,6 +25,9 @@ class ADDRESS_TOOLS:
         return list(indexed_brgy["adm4"].unique())
     
 class USER_INFO_MNGR:
+    '''
+    Class for Handling user inputs during acct creation
+    '''
     def __init__(self, fname, lname, reg, prov, citymuni, brgy, bday: datetime.date, gender) -> None:
         self.fname = fname
         self.lname = lname
@@ -46,3 +52,5 @@ class USER_INFO_MNGR:
     
     def get_full_address(self):
         return f"{self.brgy}, {self.citymuni}, {self.prov}, {self.reg}"
+    
+

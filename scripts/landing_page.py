@@ -205,37 +205,12 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
 
     def section_body3(self):
-        fromdate = st.date_input("Start Date")
-        todate = st.date_input("To Date")
-        run = st.button(label="Run request")
+        run = st.button(label="Update current price data")
         
         if run:
             with st.spinner("Fetching all 1yr data..."):
-                PSE_LIST = self.TOML.get_PSE_list(mode="ticker")
-                progress_bar = st.progress(0, "Fetching all data...")
-                data = {}
-                for i,EQUITY in enumerate(PSE_LIST):
-                    if EQUITY != None or EQUITY is not np.nan:
-                        if not os.path.isfile(os.path.join("temp","data.json")):
-                            a = open(os.path.join("temp","data.json"),"w")
-                            a.close()
-
-                        try:
-                            req = self.providers.get_historical_prices(EQUITY.upper(),fromdate.strftime('%Y-%m-%d'), todate.strftime('%Y-%m-%d'))
-                            data[EQUITY] = req
-                        except requests.exceptions.HTTPError as e:
-                            st.session_state.error = e
-                            pass
-
-                    progress_bar.progress(int((i/len(PSE_LIST))*100),f"Getting data for: {EQUITY}")
-                progress_bar.empty()
-                
-                dumpFile = open(os.path.join("temp","data.json"), "w")
-                json.dump(data,dumpFile)
-                dumpFile.close()
-                st.write("Dumped files. Please check the DB.")
-
-
+                self.providers.update_data()
+            st.info("Dataset updated")
 
 
 class Section_Objects:
@@ -348,7 +323,7 @@ class Section_Objects:
         <p id="ticker_[ticker_tag]">%percent_change%</p>
         <p id="divider_p" class="reduce_margin">Intra-day Volume & Value</p>
         <p id="value_view" class="reduce_margin"><b>%value%</b></p>     
-        <p id="volume_[ticker_tag]" class="reduce_margin"><b>%volume%</b> [symbol]</p>
+        <p id="volume_[ticker_tag]"><b>%volume%</b> [symbol]</p>
     </div>
                    
 </body>

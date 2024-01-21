@@ -1,8 +1,9 @@
 import streamlit as st
 from eod import EodHistoricalData
 import json, os
+from datetime import datetime, timedelta
 from supabase import create_client, Client
-from scripts.configs import *
+# from scripts.configs import *
 
 class DATA_PROVIDERS:
 
@@ -24,3 +25,37 @@ class DATA_PROVIDERS:
 
                 # [self.data_upload(quote, ticker_symbol=ticker_symbol) for quote in resp]
         return resp
+    
+    def update_data(self):
+        a = open(os.path.join("temp","data.json"),"r")
+        load_json = json.load(a)
+        a.close()
+        updated_json = {}
+        dates = []
+        for data in load_json.values():
+            try:
+                #take not that by default, the data is ascending
+                if data[-1]['date'] not in dates:
+                    dates.append(datetime.strptime((data[-1]['date']), "%Y-%m-%d"))
+            except IndexError:
+                # "Stock is halted,terminated, or inactive."
+                pass
+
+        from_when=max(dates) + timedelta(days=1)
+        to_when=datetime.now().date()
+
+        ####
+
+        for data in load_json.items():
+            update = self.get_historical_prices(data[0].strip(),from_date=from_when,to_date=to_when)
+            updated_json[data[0]] = data[1] + update
+
+        update_data = open(os.path.join("temp","data.json"),"w")
+        json.dump(updated_json,update_data,indent=2)
+            
+
+
+
+if __name__ == "__main__":
+    a = DATA_PROVIDERS()
+    a.update_data()
