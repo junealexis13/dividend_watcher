@@ -4,7 +4,9 @@ import pandas as pd
 import threading
 import toml, requests, os, json, requests
 import numpy as np
-from datetime import datetime
+import plotly.graph_objects as go
+import plotly.subplots as sp
+from datetime import datetime, timedelta
 from scripts.configs import TOML
 from scripts.data_parser import StockData
 from scripts.app_state import STATE
@@ -205,19 +207,27 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
 
     def section_body3(self):
-        run = st.button(label="Update current price data")
-        
-        if run:
-            with st.spinner("Fetching all 1yr data..."):
-                self.providers.update_data()
-            st.info("Dataset updated")
+        top1, top2= st.columns([.5,.5])
+        obj = Section_Objects()
+        with top1:
+            tickers = st.selectbox("View stock price",self.TOML.get_PSE_list(),index=None)
+            run = st.button(label="\nshow\n")
 
+        with top2:
+            period = st.radio("Choose period",options=["1 year","9 months","6 months","3 months"])
+ 
+        if run:
+            st.divider()
+            obj.create_plotly_widget(ticker_name=tickers, period=period)
+
+            _, view, _ = st.columns((1,1,1))
 
 class Section_Objects:
     def __init__(self) -> None:
         #Fetch recent market data
         self.DATA = StockData()
         self.TOML = TOML()
+        self.providers = DATA_PROVIDERS()
 
     def fetch_stockpicks(self, typeOut="sp"):
         if typeOut.lower() == 'sp':
@@ -365,3 +375,49 @@ class Section_Objects:
                                 self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"sp{full_rows*3+n}")
                             elif typeOut.lower() == "ac":
                                 self.create_equity_card(stockpicks[full_rows*3+n], idTag=f"ac{full_rows*3+n}")
+
+    def create_plotly_widget(self, ticker_name, period):
+
+        match period:
+            case "1 year":
+                tdelta = 365
+            case "9 months":
+                tdelta = 31*9
+            case "6 months":
+                tdelta = 31*6
+            case "3 months":
+                tdelta = 31*3
+
+        from_when = datetime.now().date() - timedelta(days=tdelta)
+        to_when =  datetime.now().date()
+
+        data =  self.providers.get_historical_prices(ticker_symbol=ticker_name,from_date=from_when.strftime("%Y-%m-%d"), to_date=to_when.strftime("%Y-%m-%d"))
+        df = pd.DataFrame(data)
+
+        
+        fig = sp.make_subplots(rows=3,cols=1,shared_xaxes=True,vertical_spacing=0.02,row_heights=[0.6, 0.2, 0.2])
+
+        fig.add_trace(go.Candlestick(x=df['date'],
+                open=df['open'].astype(float),
+                high=df['high'].astype(float),
+                low=df['low'].astype(float),
+                close=df['close'].astype(float),
+                increasing_line_color= '#1eedd1', decreasing_line_color= '#f46a5c',
+                name='Chart'))
+        
+        fig.add_trace(go.Bar(x=df['date'],y=df['volume'], name='Volume'),row=2,col=1)
+        fig.add_trace(go.Scatter(x=df['date'], y=df['adjusted_close'], mode='lines', name='Plot Trace'),row=3,col=1)
+        fig.update_xaxes(type='category', tickmode='array', tickvals=np.linspace(0, len(df['date']),10), ticktext=df['date'])
+
+        #Update Price Figure layout
+        fig.update_layout(
+        yaxis1_title = "Stock Price (PHP)",
+        yaxis2_title = "Volume (M)",
+        xaxis1_rangeslider_visible = False,
+        xaxis2_rangeslider_visible = False)
+
+        with st.container(border=True):
+            name = self.TOML.get_company_name(ticker_name)
+            st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+            st.plotly_chart(fig,use_container_width=True)
+            st.markdown(f'''<p style="font-size: 0.75rem; text-align: justify; font-family: Arial;">Enable wide view on options for better experierence</p>''', unsafe_allow_html=True)

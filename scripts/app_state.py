@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 class STATE:
     def __init__(self) -> None:
         #Create a custom states. Initial States
@@ -15,6 +16,9 @@ class STATE:
         if "error_message" not in st.session_state:
             st.session_state["error_message"] = None
 
+        if "is_admin" not in st.session_state:
+            st.session_state["is_admin"] = False
+
     def _dev_toggle_login_state(self):
         toggle = st.checkbox('Enable logged-in state.',value = st.session_state['logged-in'])
         if toggle:
@@ -22,3 +26,7 @@ class STATE:
         else:
             st.session_state['logged-in'] = False
         st.write(st.session_state['logged-in'])
+
+
+    def set_page_config(self):
+        st.set_page_config(layout='centered',page_title='PSE-Div Screener',page_icon=os.path.join("resources","page_icon.ico"))

@@ -28,7 +28,6 @@ class SB_CLIENT:
             }
         )
 
-    
     def signIn_User(self, email: str, password: str , *args):
         data = self.SB_Client.auth.sign_in_with_password(
                 {

@@ -6,12 +6,14 @@ import os
 import os
 
 if __name__ == "__main__":
+    CONFIGS = STATE()
+    CONFIGS.set_page_config()
+
 
     #Landing Page
     st.image(r"resources/dividend_header2.png")
 
     A = UI()
-    B = STATE()
     C = DATA_PROVIDERS()
     
     Auth = SB_CLIENT()
@@ -24,6 +26,8 @@ if __name__ == "__main__":
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:")
 
     ])
+
+
 
     ####UI CODES AFTER HERE####
 
@@ -63,7 +67,9 @@ if __name__ == "__main__":
     with __prototype_view:
         A.section_body3()
         
-    with st.expander("debug message"):
-        st.write(st.session_state['error_message'])
+
+    if st.session_state["is_admin"]:
+        with st.expander("debug message"):
+            st.write(st.session_state['error_message'])
 
     

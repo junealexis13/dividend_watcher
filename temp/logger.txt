@@ -1,1 +1,4 @@
 Updated --- 2024-01-21 13:22:07.157707
+########
+Error encountered --- 2024-01-21 17:43:00.576198
+Error Message: 'API_KEY'

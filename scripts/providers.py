@@ -3,7 +3,7 @@ from eod import EodHistoricalData
 import json, os
 from datetime import datetime, timedelta
 from supabase import create_client, Client
-# from scripts.configs import *
+from scripts.configs import *
 
 class DATA_PROVIDERS:
 
@@ -52,10 +52,3 @@ class DATA_PROVIDERS:
 
         update_data = open(os.path.join("temp","data.json"),"w")
         json.dump(updated_json,update_data,indent=2)
-            
-
-
-
-if __name__ == "__main__":
-    a = DATA_PROVIDERS()
-    a.update_data()
