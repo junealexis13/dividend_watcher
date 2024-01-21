@@ -1,4 +1,4 @@
-name: run main.py
+name: update PSE Stock Market
 
 on:
   schedule:
