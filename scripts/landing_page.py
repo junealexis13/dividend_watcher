@@ -207,20 +207,24 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
 
     def section_body3(self):
-        top1, top2= st.columns([.5,.5])
-        obj = Section_Objects()
-        with top1:
-            tickers = st.selectbox("View stock price",self.TOML.get_PSE_list(),index=None)
-            run = st.button(label="\nshow\n")
+        if st.session_state['logged-in']:
+            top1, top2= st.columns([.5,.5])
+            obj = Section_Objects()
+            with top1:
+                tickers = st.selectbox("View stock price",self.TOML.get_PSE_list(),index=None)
+                run = st.button(label="\nshow\n")
 
-        with top2:
-            period = st.radio("Choose period",options=["1 year","9 months","6 months","3 months"])
- 
-        if run:
-            st.divider()
-            obj.create_plotly_widget(ticker_name=tickers, period=period)
+            with top2:
+                period = st.radio("Choose period",options=["1 year","9 months","6 months","3 months"])
+    
+            if run:
+                st.divider()
+                obj.create_plotly_widget(ticker_name=tickers, period=period)
 
-            _, view, _ = st.columns((1,1,1))
+                _, view, _ = st.columns((1,1,1))
+
+        else:
+            st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to use stock viewer</h1>", unsafe_allow_html=True)
 
 class Section_Objects:
     def __init__(self) -> None:
@@ -391,23 +395,32 @@ class Section_Objects:
         from_when = datetime.now().date() - timedelta(days=tdelta)
         to_when =  datetime.now().date()
 
-        data =  self.providers.get_historical_prices(ticker_symbol=ticker_name,from_date=from_when.strftime("%Y-%m-%d"), to_date=to_when.strftime("%Y-%m-%d"))
+        data =  self.providers.get_historical_prices_local(ticker_name=ticker_name)
         df = pd.DataFrame(data)
 
-        
+        # Convert 'date' column to datetime
+        df['date'] = pd.to_datetime(df['date']).dt.date
+
+        # Set 'date' column as the index
+        df.set_index('date', inplace=True)
+        fdata = df.loc[from_when:to_when]
+
         fig = sp.make_subplots(rows=3,cols=1,shared_xaxes=True,vertical_spacing=0.02,row_heights=[0.6, 0.2, 0.2])
 
-        fig.add_trace(go.Candlestick(x=df['date'],
-                open=df['open'].astype(float),
-                high=df['high'].astype(float),
-                low=df['low'].astype(float),
-                close=df['close'].astype(float),
+        fig.add_trace(go.Candlestick(x=fdata.index,
+                open=fdata['open'].astype(float),
+                high=fdata['high'].astype(float),
+                low=fdata['low'].astype(float),
+                close=fdata['close'].astype(float),
                 increasing_line_color= '#1eedd1', decreasing_line_color= '#f46a5c',
                 name='Chart'))
         
-        fig.add_trace(go.Bar(x=df['date'],y=df['volume'], name='Volume'),row=2,col=1)
-        fig.add_trace(go.Scatter(x=df['date'], y=df['adjusted_close'], mode='lines', name='Plot Trace'),row=3,col=1)
-        fig.update_xaxes(type='category', tickmode='array', tickvals=np.linspace(0, len(df['date']),10), ticktext=df['date'])
+        fig.add_trace(go.Bar(x=fdata.index,y=fdata['volume'], name='Volume'),row=2,col=1)
+        fig.add_trace(go.Scatter(x=fdata.index, y=fdata['adjusted_close'], mode='lines', name='Plot Trace'),row=3,col=1)
+        fig.update_xaxes(type='category', tickmode='array', tickvals=np.linspace(0, len(fdata.index),10), ticktext=fdata.index)
+        fig.update_layout(legend=dict(x=0, y=-0.2, traceorder='normal', orientation='h'))
+
+        fig.update_layout(width=800, height=400)  # Set your desired figure size
 
         #Update Price Figure layout
         fig.update_layout(

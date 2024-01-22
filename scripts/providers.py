@@ -3,7 +3,7 @@ from eod import EodHistoricalData
 import json, os
 from datetime import datetime, timedelta
 from supabase import create_client, Client
-from scripts.configs import *
+# from scripts.configs import *
 
 class DATA_PROVIDERS:
 
@@ -22,7 +22,6 @@ class DATA_PROVIDERS:
     def get_historical_prices(self,ticker_symbol, from_date, to_date) -> list:
         client = EodHistoricalData(st.secrets["eodhd"]["API_KEY"])
         resp = client.get_prices_eod(f'{ticker_symbol.upper()}.PSE', period='a', order='a', from_=from_date, to = to_date )
-
                 # [self.data_upload(quote, ticker_symbol=ticker_symbol) for quote in resp]
         return resp
     
@@ -52,3 +51,10 @@ class DATA_PROVIDERS:
 
         update_data = open(os.path.join("temp","data.json"),"w")
         json.dump(updated_json,update_data,indent=2)
+
+    def get_historical_prices_local(self, ticker_name):
+        #load json file
+        load_stocks_local = open(os.path.join("temp","data.json"))
+        local_data = json.load(load_stocks_local)
+        load_stocks_local.close()
+        return local_data[ticker_name]

@@ -7,3 +7,4 @@ streamlit==1.29.0
 supabase==2.3.3
 toml==0.10.2
 eod==0.2.1
+plotly==5.18.0
