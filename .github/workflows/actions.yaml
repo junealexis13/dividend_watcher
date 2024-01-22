@@ -10,7 +10,7 @@ jobs:
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout the repository content to github runner
+        uses: actions/checkout@v4 # checkout the repository content to github runner
 
       - name: setup python
         uses: actions/setup-python@v4
@@ -20,7 +20,7 @@ jobs:
       - name: install python packages
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r git_requirements.txt
           
       - name: execute py script # run main.py
         env:
@@ -35,7 +35,14 @@ jobs:
           git diff-index --quiet HEAD || (git commit -a -m "updated logs" --allow-empty)
           
       - name: push changes
-        uses: ad-m/github-push-action@v0.6.0
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main 
+
+
+      - name: new auto-commit
+        # Commit all changed files back to the repository
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Updated log.
