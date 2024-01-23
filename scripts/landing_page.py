@@ -12,6 +12,7 @@ from scripts.data_parser import StockData
 from scripts.app_state import STATE
 from scripts.exceptions import *
 from scripts.providers import DATA_PROVIDERS
+from scripts.portfolio_manager import *
 
 class UI:
     def __init__(self) -> None:
@@ -22,23 +23,36 @@ class UI:
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.now()
         self.providers = DATA_PROVIDERS()
-        
+        self.portfolio_manager = PORTFOLIO_MANAGER()
+
     def login_ui(self):
         with st.container(border=True):
             st.markdown("<p style='color: black;'>Account Login</p>", unsafe_allow_html=True)
             user_login = st.text_input(label="user",type="default")
             user_pass = st.text_input(label="password",type="password")
             return user_login, user_pass
-        
+    
+    def content_unavailable(self):
+        st.markdown('''
+        <html>
+            <head>
+                <style>
+                    .center {text-align: center}
+                </style>
+            </head>
+            <body>
+                <h1 class="center">Content Unavailable</h1>
+                <p class="center">Please consider logging in. If you have no account, I recommend to create an account. It's free.</p>
+            </body>
+        </html>
+        ''',unsafe_allow_html=True)
+
     def load_equity_data(self):
         self.PSE_stats = self.DATA.get_stock_stats(st.session_state['stock_on_view']) 
         data_stock = self.PSE_stats['stock'][0]
         st.metric("Current Equity Data",f"₱{data_stock['price']['amount']}",f"{data_stock['percent_change']}%")
         st.markdown(f"<p style ='font-size:0.75rem;'>Latest Vol. {int(data_stock['volume']):,}</p>", unsafe_allow_html=True)
 
-    def fetch_3month_stream(self, ticker_name):
-        return self.DATA.create_historical_data(ticker_name)
-    
     def create_columns(self, ticker_name):
         #create cols
         col_nums = 3
@@ -64,7 +78,7 @@ class UI:
                 st.markdown(f"<p style ='font-size:0.75rem;'>₱ {round(prev,2)}/s ({str(_prev_year)})</p>", unsafe_allow_html=True)
 
             with cols[1]:
-                st.metric(f"%YLD to Date",f"{round(curr/(float(curr_price.strip('%')))*100,2)}%", f"{round((curr/(float(curr_price.strip('%'))))*100 - (prev_percent*100),2)}%")
+                st.metric(f"%YLD to Date",f"{round(curr/float(curr_price.strip('%'))*100,2)}%", f"{round((curr/(float(curr_price.strip('%'))))*100 - (prev_percent*100),2)}%")
                 st.markdown(f"<p style ='font-size:0.75rem;'>{prev_percent*100}% ({str(_prev_year)})</p>", unsafe_allow_html=True)
 
 
@@ -164,7 +178,6 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             if show_all_dividend_data and st.session_state['stock_on_view'] is not None:
                 with st.container(border=True):
                     self.view_all_dividend_info(stocks)
-                    st.write(self.fetch_3month_stream(stocks))
 
         except TypeError as e:
             st.info(f'Choose stock to view') 
@@ -210,21 +223,44 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         if st.session_state['logged-in']:
             top1, top2= st.columns([.5,.5])
             obj = Section_Objects()
-            with top1:
-                tickers = st.selectbox("View stock price",self.TOML.get_PSE_list(),index=None)
-                run = st.button(label="\nshow\n")
+            try:
+                with top1:
+                    tickers = st.selectbox("View stock price",self.TOML.get_PSE_list(),index=None)
+                    run = st.button(label="\nshow\n")
 
-            with top2:
-                period = st.radio("Choose period",options=["1 year","9 months","6 months","3 months"])
-    
-            if run:
-                st.divider()
-                obj.create_plotly_widget(ticker_name=tickers, period=period)
+                with top2:
+                    period = st.radio("Choose period",options=["1 year","9 months","6 months","3 months"])
+        
+                if run:
+                    st.divider()
+                    obj.create_plotly_widget(ticker_name=tickers, period=period)
 
-                _, view, _ = st.columns((1,1,1))
+                    _, view, _ = st.columns((1,1,1))
+            except KeyError:
+                st.info("Please select valid stock to view.")
 
         else:
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to use stock viewer</h1>", unsafe_allow_html=True)
+
+    def portfolio_manager_UI(self):
+        st.divider()
+        st.markdown(f"<h1 style='text-align: center;'>Portfolio Manager</h1>", unsafe_allow_html=True)
+
+        sbox, button_change = st.columns([3,1])
+        with sbox:
+            stockpicks = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9)
+        with button_change:
+            st.markdown('''<style> .st-emotion-cache-xa76i4 {padding_top:3rem} </style>''',unsafe_allow_html=True)
+            edit_picks = st.button("Update Stock Picks")
+            if edit_picks:
+                self.portfolio_manager.edit_stockpicks(stockpicks)
+                st.info("Update_success!")
+
+
+        if len(stockpicks) > 0:
+            with st.container( border=True):
+                st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
+                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks]
 
 class Section_Objects:
     def __init__(self) -> None:
@@ -360,6 +396,7 @@ class Section_Objects:
                                     self.create_equity_card(stockpicks[i*3+n],idTag=f"sp{i*3+n}")
                                 elif typeOut.lower() == "ac":
                                     self.create_equity_card(stockpicks[i*3+n],idTag=f"ac{i*3+n}")
+
                 case full_rows, partial_rows if partial_rows > 0:
                     #fetch full rows
                     for i in range(full_rows):

@@ -5,3 +5,4 @@ from scripts.landing_page import *
 from scripts.appAuth import *
 from scripts.other_tools import *
 from scripts.providers import *
+from scripts.portfolio_manager import *

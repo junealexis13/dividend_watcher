@@ -89,27 +89,4 @@ class StockData:
                 return None
         except Exception as e:
             raise Equity_Data_Error(ticker_name)
-        
-
-    def create_historical_data(self, ticker_name: str, fetch_type="current-3months"):
-        match fetch_type:
-            case "current-3months":
-                # Get the current date
-                current_date = datetime.now().date()
-                
-
-                @st.cache_data(show_spinner=True)
-                def load_historicals(then, now, stream_address: str, ticker_name: str):
-                    # Loop through all dates from current date to 3 months ago
-                    dates: datetime.date() = now
-                    date_collection = []
-                    while dates >= then:
-                        # req stream
-                        req = requests.get(stream_address + f"{ticker_name.upper()}.{dates.strftime('%Y-%m-%d')}.json")
-                        if req.status_code != 404:
-                            print(req.status_code)
-                            date_collection.append([dates.strftime('%Y-%m-%d'), req.json()["stock"][0]["price"]["amount"]])
-                        dates -= timedelta(days=1)
-                    return date_collection
-                
-                return load_historicals(current_date - relativedelta(months=3),current_date,self.current_stock_stat_address,ticker_name)
+    
