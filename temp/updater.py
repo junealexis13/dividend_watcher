@@ -35,20 +35,23 @@ class UPDATE_DATA:
             to_when=datetime.now().date()
 
             ####
+            if from_when != to_when:
+                for data in load_json.items():
+                    update = self.get_historical_prices(data[0].strip(),from_date=from_when,to_date=to_when)
+                    updated_json[data[0]] = data[1] + update
 
-            for data in load_json.items():
-                update = self.get_historical_prices(data[0].strip(),from_date=from_when,to_date=to_when)
-                updated_json[data[0]] = data[1] + update
-
-            update_data = open(os.path.join("temp","data.json"),"w")
-            json.dump(updated_json,update_data,indent=2)
-            
-        #### 
-            self.logger.write(f"Updated --- {datetime.now()}\n")
-            self.logger.close()
+                update_data = open(os.path.join("temp","data.json"),"w")
+                json.dump(updated_json,update_data,indent=2)
+                
+            #### 
+                self.logger.write(f"✅✅✅ Updated --- {datetime.now()}\n")
+                self.logger.close()
+            else:
+                self.logger.write(f"✅✅✅ All data update to date --- {datetime.now()}\n")
+                self.logger.close()
 
         except Exception as e:
-            self.logger.write(f"########\nError encountered --- {datetime.now()}\nError Message: {e}\n")
+            self.logger.write(f"########\n❌❌❌ Error encountered --- {datetime.now()}\nError Message: {e}\n")
             self.logger.close()
 
 
