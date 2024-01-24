@@ -7,8 +7,11 @@ class PORTFOLIO_MANAGER:
         pass
 
     def get_stockpicks(self):
-        stock_picks = toml.load(os.path.join("user_cookies.toml"))
-        return stock_picks['stockPicks']
+        try:
+            stock_picks = toml.load(os.path.join("user_cookies.toml"))
+            return stock_picks['stockPicks']
+        except KeyError as e:
+            return list()
 
     def edit_stockpicks(self, new_stockpicks: list):
         with open(os.path.join("user_cookies.toml"),"w") as rd:
