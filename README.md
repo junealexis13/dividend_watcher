@@ -1,4 +1,4 @@
-#Simple Dividend Screener and Stock Monitoring App for *PSE Investors*
+Simple Dividend Screener and Stock Monitoring App for *PSE Investors*
 
 ---
 
@@ -18,7 +18,7 @@ Thank you!
 
 ---
 
-#Powered by:
+POWERED BY:
 
 - PHISIX REST API
 - Posibility  (www.pesobility.com)
