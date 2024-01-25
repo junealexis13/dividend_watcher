@@ -1,4 +1,4 @@
-Simple Dividend Screener and Stock Monitoring App for *PSE Investors*
+#Simple Dividend Screener and Stock Monitoring App for *PSE Investors*
 
 ---
 
@@ -15,3 +15,13 @@ This is my first big project. Kindly send me you suggestions to:
 **junealexis.santos13@gmail.com**
 
 Thank you!
+
+---
+
+###Powered by
+
+PHISIX REST API
+Posibility - www.pesobility.com
+EODHD API
+Streamlit
+Python 3.10
