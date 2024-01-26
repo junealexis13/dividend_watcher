@@ -42,7 +42,7 @@ class UI:
             </head>
             <body>
                 <h1 class="center">Content Unavailable</h1>
-                <p class="center">Please consider logging in. If you have no account, I recommend to create an account. It's free.</p>
+                <p class="center">Please consider logging in. If you have no account, I recommend to create one. It's free.</p>
             </body>
         </html>
         ''',unsafe_allow_html=True)

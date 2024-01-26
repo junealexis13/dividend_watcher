@@ -24,7 +24,8 @@ if __name__ == "__main__":
     show_pages([
         Page("main.py","Home",":house_with_garden:"),
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
-        Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:")
+        Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
+        Page(os.path.join("pages","author.py"),"Author",":boy:")
         ])
 
 
@@ -71,5 +72,3 @@ if __name__ == "__main__":
     if st.session_state["is_admin"]:
         with st.expander("debug message"):
             st.write(st.session_state['error_message'])
-
-    
