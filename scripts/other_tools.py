@@ -46,7 +46,7 @@ class USER_INFO_MNGR:
             "add_prov"      : self.prov,
             "add_citymuni"  : self.citymuni,
             "add_brgy"      : self.brgy,
-            "bday"          : self.bday,
+            "birthday"      : self.bday,
             "gender"        : self.gender
         }
     

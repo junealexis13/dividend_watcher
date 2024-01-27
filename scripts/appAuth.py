@@ -4,6 +4,7 @@ import streamlit as st
 from supabase import create_client, Client
 
 
+
 class SB_CLIENT:
     def __init__(self) -> None:
         self.SB_URL = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
@@ -47,3 +48,10 @@ class SB_CLIENT:
             st.rerun()
         except Exception as e:
             st.error(e)
+
+    def fetch_user_info(self):
+        data = self.SB_Client.auth.get_user()
+        if st.session_state["logged-in_user"] is None:
+            st.session_state["logged-in_user"] = data
+        return data
+

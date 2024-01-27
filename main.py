@@ -36,7 +36,6 @@ if __name__ == "__main__":
     #in sidebar
     with st.sidebar:
         A.profile_view()
-
         if not st.session_state["logged-in"]:
 
                 user_login,user_pass = A.login_ui()
@@ -47,8 +46,11 @@ if __name__ == "__main__":
                         if (user_login, user_pass) == ('admin','admin'):
                             st.session_state['logged-in'] = True
                             st.session_state['is_admin'] = True
+                            st.rerun()
                         else:
                             Auth.signIn_User(user_login,user_pass)
+                            Auth.fetch_user_info()
+                            print(dict(st.session_state["logged-in_user"]))
                             st.rerun()
                     except Exception as e:
                         st.error(e)

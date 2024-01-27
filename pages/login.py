@@ -57,6 +57,7 @@ signUp_bday = st.date_input("Your birthday :balloon:")
 signUp_gender = st.selectbox("Gender",["Male","Female","Prefer not to say","None of the above"])
 submit = st.button("Submit and Create Account")
 if submit:
+    
     __info_mgr = USER_INFO_MNGR(
         signUp_Fname,
         signUp_Lname,
@@ -70,7 +71,7 @@ if submit:
         __login.register_User(signUp_email, signUp_pass, __info_mgr.pack_data())
         st.info(f"Confirmation link has been sent to {signUp_email}")
     except Exception as e:
-        st.warning("An error occured.")
+        st.warning("An error occured. Please check your inputs and try again.")
         print(e)
 st.divider()
 st.markdown("<p class='center_title caption_styling'>All information you provided here will be encrypted. I promise.</p>", unsafe_allow_html=True)
