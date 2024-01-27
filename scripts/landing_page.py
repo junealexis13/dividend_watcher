@@ -245,13 +245,13 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
     def portfolio_manager_UI(self):
         st.divider()
         st.markdown(f"<h1 style='text-align: center;'>Portfolio Manager</h1>", unsafe_allow_html=True)
-
-        sbox, button_change = st.columns([3,1])
+        st.markdown(f"<h3 style='text-align: center;'>Update Stock Picks</h3>", unsafe_allow_html=True)
+        sbox, button_change = st.columns([5,1])
         with sbox:
             stockpicks = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9)
         with button_change:
             st.markdown('''<style> .st-emotion-cache-xa76i4 {padding_top:3rem} </style>''',unsafe_allow_html=True)
-            edit_picks = st.button("Update Stock Picks")
+            edit_picks = st.button("Update")
             if edit_picks:
                 self.portfolio_manager.edit_stockpicks(stockpicks)
                 st.info("Update_success!")
@@ -261,6 +261,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             with st.container( border=True):
                 st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
                 [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks]
+        st.divider()
 
 class Section_Objects:
     def __init__(self) -> None:

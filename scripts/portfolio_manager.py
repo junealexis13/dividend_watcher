@@ -15,7 +15,7 @@ class PORTFOLIO_MANAGER:
 
     def edit_stockpicks(self, new_stockpicks: list):
         with open(os.path.join("user_cookies.toml"),"w") as rd:
-            toml.dump({"stockPicks":{new_stockpicks}})
+            toml.dump({"stockPicks":new_stockpicks}, rd)
 
 if __name__ == "__main__":
     A = PORTFOLIO_MANAGER()
