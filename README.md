@@ -1,4 +1,4 @@
-#Simple Dividend Screener and Stock Monitoring App for *PSE Investors*
+Simple Dividend Screener and Stock Monitoring App for *PSE Investors*
 
 ---
 Visit here: https://phdividendwatcher.streamlit.app/
