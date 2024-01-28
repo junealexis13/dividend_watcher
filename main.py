@@ -60,9 +60,16 @@ if __name__ == "__main__":
                 Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
                 Page(os.path.join("pages","author.py"),"Author",":boy:")
                 ])
+            
+
             logout = st.button("Log out",key="logout-button")
             if logout:
                 Auth.signOut()
+
+            st.divider()
+            Auth.create_selection()
+            st.write(st.session_state["active_stockPicks"])
+            
                         
 
     dividend_screener, current_equity, __prototype_view = st.tabs(["Screener", "Equity", "Viewer"])

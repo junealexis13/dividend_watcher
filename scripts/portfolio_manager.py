@@ -1,22 +1,12 @@
 import streamlit as st
-# from scripts.exceptions import *
+from scripts.appAuth import *
 import toml, os
+from supabase import create_client, Client
 
-class PORTFOLIO_MANAGER:
+class PORTFOLIO_MANAGER(SB_CLIENT):
     def __init__(self):
-        pass
+        self.SB_URL = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
+        self.SB_KEY = st.secrets["connections"]["supabase"]["SUPABASE_KEY"]
 
-    def get_stockpicks(self):
-        try:
-            stock_picks = toml.load(os.path.join("user_cookies.toml"))
-            return stock_picks['stockPicks']
-        except KeyError as e:
-            return list()
-
-    def edit_stockpicks(self, new_stockpicks: list):
-        with open(os.path.join("user_cookies.toml"),"w") as rd:
-            toml.dump({"stockPicks":new_stockpicks}, rd)
-
-if __name__ == "__main__":
-    A = PORTFOLIO_MANAGER()
-    print(A.get_stockpicks())
+        #Init Client
+        self.newClient: Client = create_client(self.SB_URL, self.SB_KEY)

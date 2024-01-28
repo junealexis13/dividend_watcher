@@ -13,6 +13,7 @@ from scripts.app_state import STATE
 from scripts.exceptions import *
 from scripts.providers import DATA_PROVIDERS
 from scripts.portfolio_manager import *
+from scripts.appAuth import *
 
 class UI:
     def __init__(self) -> None:
@@ -24,6 +25,7 @@ class UI:
         self.current_datetime = datetime.now()
         self.providers = DATA_PROVIDERS()
         self.portfolio_manager = PORTFOLIO_MANAGER()
+        self.SB_Client = SB_CLIENT()
 
     def login_ui(self):
         with st.container(border=True):
@@ -159,7 +161,6 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         try:
             self.pre_section_body1()
             stocks = self.custom_selection()
-
             with st.sidebar:
                 st.header(":gear: Additional Settings")
 
@@ -202,10 +203,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
     def section_body2(self):
         obj = Section_Objects()
         self.pre_section_body2()
-
         #Stock picks section
         st.divider()
         st.markdown(f"<h1 style='text-align: center;padding-top: 0;'> Watchlist</h1>", unsafe_allow_html=True)
+        
         if not st.session_state['logged-in']:
             st.caption("<p style='text-align: center;padding: 0;'>You are not logged in. Register an account and see your favorite stocks here.</p>", unsafe_allow_html=True)
         elif st.session_state['logged-in']:
@@ -243,24 +244,41 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to use stock viewer</h1>", unsafe_allow_html=True)
 
     def portfolio_manager_UI(self):
-        st.divider()
+
         st.markdown(f"<h1 style='text-align: center;'>Portfolio Manager</h1>", unsafe_allow_html=True)
-        st.markdown(f"<h3 style='text-align: center;'>Update Stock Picks</h3>", unsafe_allow_html=True)
-        sbox, button_change = st.columns([5,1])
-        with sbox:
-            stockpicks = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9)
-        with button_change:
-            st.markdown('''<style> .st-emotion-cache-xa76i4 {padding_top:3rem} </style>''',unsafe_allow_html=True)
-            edit_picks = st.button("Update")
-            if edit_picks:
-                self.portfolio_manager.edit_stockpicks(stockpicks)
-                st.info("Update_success!")
+        st.markdown(f"<h3 style='text-align: center;'>Create Stock Picks</h3>", unsafe_allow_html=True)
+        st.divider()
 
 
-        if len(stockpicks) > 0:
+        with st.container():
+            stockpicks_new = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="new_stockPicks")
+            sp_name_new = st.text_input(label="Give me some cool name for your picks.",max_chars=30,key="new_sp_name")
+            new_picks = st.button("Create",key="newsp_button")
+        if new_picks:
+            self.SB_Client.create_stockPicks(stockpicks_new,sp_name_new)
+            st.info("Successfully created new stock picks!")
+        if len(stockpicks_new) > 0:
             with st.container( border=True):
                 st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
-                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks]
+                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks_new]
+        st.divider()
+        st.markdown(f"<h3 style='text-align: center;'>Update Current Stock Picks</h3>", unsafe_allow_html=True)
+
+        with st.container():
+            sp_to_edit = self.SB_Client.select_sp_element()
+            st.write(json.loads(sp_to_edit["picks"]))
+            stockpicks_edit = st.multiselect("Select your new set of stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="update_stockPicks")
+            sp_name_edit = st.text_input(label="Give me some cool name for your picks.",max_chars=30, key="edit_sp_name")
+            edit_picks = st.button("Update", key="editsp_button")
+        if edit_picks:
+            self.SB_Client.update_stockPicks(stockpicks_edit,sp_name_edit,sp_to_edit["SP_id"])
+            st.info("Update success!")
+
+        if len(stockpicks_edit) > 0:
+            with st.container( border=True):
+                st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
+                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks_edit]
+
         st.divider()
 
 class Section_Objects:
@@ -272,10 +290,7 @@ class Section_Objects:
 
     def fetch_stockpicks(self, typeOut="sp"):
         if typeOut.lower() == 'sp':
-            with open("user_cookies.toml", "r") as rd :
-                load_cookies = toml.load(rd)
-                rd.close()
-            return load_cookies["stockPicks"]
+            return st.session_state['active_stockPicks']
         
         if typeOut.lower() == 'ac':
             stock_picks = st.multiselect("Select multiple stocks to view",self.TOML.get_PSE_list(), max_selections=9, help="You can select up to 9 stocks at the same time.")

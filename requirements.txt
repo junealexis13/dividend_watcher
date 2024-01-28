@@ -3,8 +3,8 @@ pandas==2.1.4
 python_dateutil==2.8.2
 Requests==2.31.0
 st_pages==0.4.5
-streamlit==1.29.0
-supabase==2.3.3
+streamlit==1.30.0
+supabase==2.3.4
 toml==0.10.2
 eod==0.2.1
 plotly==5.18.0

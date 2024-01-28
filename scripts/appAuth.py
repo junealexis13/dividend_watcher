@@ -1,4 +1,4 @@
-import toml, os
+import toml, os, json
 import hashlib
 import streamlit as st
 from supabase import create_client, Client
@@ -38,20 +38,77 @@ class SB_CLIENT:
             )
     
         st.session_state['logged-in'] = True
-
-        return data
+        self.fetch_all_user_sp()
 
     def signOut(self):
         try:
             res = self.SB_Client.auth.sign_out()
             st.session_state["logged-in"] = False
+
+            with open(os.path.join("user_cookies.toml"),"w") as sp:
+                toml.dump({"stockPicks":[]},sp)
+
             st.rerun()
         except Exception as e:
             st.error(e)
 
-    def fetch_user_info(self):
-        data = self.SB_Client.auth.get_user()
-        if st.session_state["logged-in_user"] is None:
-            st.session_state["logged-in_user"] = data
-        return data
+    def create_stockPicks(self, stockpicks: list, stockpick_name: str):
+        jsonize_stockpicks = json.dumps(stockpicks)
+        self.SB_Client.table("stockpicks").insert({"picks": jsonize_stockpicks, "sp_name": stockpick_name}).execute()
 
+    def update_stockPicks(self, stockpicks: list, stockpick_name: str, sp_id: str):
+        jsonize_stockpicks = json.dumps(stockpicks)
+        self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
+
+    def fetch_all_user_sp(self):
+        data = self.SB_Client.table("stockpicks").select("sp_name","picks","SP_id").eq("id",self.fetch_user_info("id")).execute()
+        update_picks = {"stockPicks":data.data}
+
+        with open(os.path.join("user_cookies.toml"),'w') as sp:        
+            toml.dump(update_picks,sp)
+            sp.close()
+
+        #default behavior. there is a mechanism to update this tho
+        st.session_state["active_stockPicks"] = json.loads(data.data[0]['picks'])
+
+    def create_sp_rows(self):
+        get_sp = toml.load(os.path.join("user_cookies.toml"))
+        print(get_sp)
+
+    def fetch_user_info(self, fetch_type="md"):
+        data = self.SB_Client.auth.get_user()
+        user_dict = dict(data)['user']
+        
+        if st.session_state["user_metadata"] is None:
+            st.session_state["user_metadata"] = user_dict.user_metadata
+
+        match fetch_type:
+            case "md":
+                return user_dict.user_metadata
+            case "id":
+                return user_dict.id
+            
+    def create_selection(self):
+        try:
+            with open(os.path.join("user_cookies.toml"),"r") as rd:
+                toml_sp = toml.load(rd)
+                picks = toml_sp['stockPicks']
+                sel_picks = st.selectbox("Set active Stockpicks",index=0,options=[x["sp_name"] for x in picks])
+                selection = [d for d in picks if d['sp_name'] == sel_picks]
+                set_sp = json.loads(selection[0]["picks"])
+                if st.session_state["active_stockPicks"] is not None:
+                    st.session_state["active_stockPicks"] = set_sp
+                rd.close()
+        except IndexError as e:
+             #error present if the user is logged out.
+             pass
+        
+    def select_sp_element(self):
+        if st.session_state["logged-in"]:
+            with open(os.path.join("user_cookies.toml"),"r") as rd:
+                toml_sp = toml.load(rd)
+                picks = toml_sp['stockPicks']
+                sel_picks = st.selectbox("Set Stockpick",index=0,options=[x["sp_name"] for x in picks])
+                selection = [d for d in picks if d['sp_name'] == sel_picks]
+                rd.close()
+                return selection[0]
