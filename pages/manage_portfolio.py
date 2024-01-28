@@ -13,18 +13,24 @@ Auth = SB_CLIENT()
  #Landing Page
 st.image(r"resources/dividend_header2.png")
 
-show_pages([
+
+with st.sidebar:
+    if st.session_state["logged-in"]:
+        show_pages([
+        Page("main.py","Home",":house_with_garden:"),
+        Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
+        Page(os.path.join("pages","author.py"),"Author",":boy:")
+        ])
+
+
+    else:
+        show_pages([
         Page("main.py","Home",":house_with_garden:"),
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
         Page(os.path.join("pages","author.py"),"Author",":boy:")
         ])
 
-
-with st.sidebar:
-    if st.session_state["logged-in"]:
-        hide_pages(["User Sign-Up"])
-    else:
         user_login,user_pass = UI.login_ui()
 
         login = st.button("Sign in",key="login-button")

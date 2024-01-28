@@ -2,25 +2,23 @@ import streamlit as st
 import os
 from st_pages import Page, show_pages, hide_pages
 
-show_pages([
-        Page("main.py","Home",":house_with_garden:"),
-        Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
-        Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
-        Page(os.path.join("pages","author.py"),"Author",":boy:")
-        ])
+
 st.image(r"resources/dividend_header2.png")
 
-show_pages([
+if st.session_state['logged-in']:
+    show_pages([
+        Page("main.py","Home",":house_with_garden:"),
+        Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
+        Page(os.path.join("pages","author.py"),"Author",":boy:")
+        ])
+else:
+    show_pages([
         Page("main.py","Home",":house_with_garden:"),
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
         Page(os.path.join("pages","author.py"),"Author",":boy:")
         ])
 
-
-with st.sidebar:
-    if st.session_state["logged-in"]:
-        hide_pages(["User Sign-Up"])
         
 st.markdown(
     '''
