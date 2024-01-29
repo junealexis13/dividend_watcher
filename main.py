@@ -84,6 +84,5 @@ if __name__ == "__main__":
         A.section_body3()
         
 
-    if st.session_state["is_admin"]:
-        with st.expander("debug message"):
-            st.write(st.session_state['error_message'])
+    with st.expander("debug message"):
+        st.write(st.session_state['error_message'])

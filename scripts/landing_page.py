@@ -131,15 +131,15 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         with st.container(border=True):
             col1, col2 = st.columns([0.2, 0.8])
             with col1:
-                st.image(os.path.join("resources","user.png"), use_column_width = True, caption='user')
+                st.image(os.path.join("resources","user.png"), use_column_width = True)
 
             with col2:
                 if not st.session_state['logged-in']:
-                    st.markdown('<p style="font-size:1rem; font-family:Arial; color:#03045e;">Logged in as: <span style="color:#03045e;font-size:1rem; font-family:Monospace;font-weight:bold;">GUEST</span></p>', unsafe_allow_html=True)
+                    st.markdown('<p style="font-size:1rem; font-family:Monospace; color:#03045e;">Logged in as: <span>GUEST</span></p>', unsafe_allow_html=True)
                     st.caption("<p style='color:#200E3A'>Login or register an account.", unsafe_allow_html=True)
                 else:
-                    st.header("*VIEWING THE PROFILE IF LOGGED IN*")
-
+                    st.markdown(f'''<p style="font-size:1rem; font-family:Monospace; color:#03045e;">Hi! <span style="font-size:1rem; font-family:Monospace;font-weight:bold;">{st.session_state["user_metadata"]['first_name']}!</span></p>''', unsafe_allow_html=True)
+                    print(st.session_state["user_metadata"]["first_name"])
     def custom_selection(self):
         stockPick = st.selectbox(
                 'Choose what Dividend Stock to View',
@@ -332,7 +332,7 @@ class Section_Objects:
         #price {
             font-family: 'IBM Plex Sans Thai Looped', sans-serif;
             font-weight: 700;
-            font-size: 2vw;
+            font-size: 3rem;
             text-align: center;
             margin-bottom: 1px; /* Adjust the margin between paragraphs */
         }
@@ -340,7 +340,7 @@ class Section_Objects:
         #change {
             font-family: 'IBM Plex Sans Thai Looped', sans-serif;
             font-weight: 500;
-            font-size: 1vw;
+            font-size: 1rem;
             text-align: center;
             margin-top: 1px; /* Adjust the margin between paragraphs */
             color: *tick_color*;
