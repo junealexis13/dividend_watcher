@@ -22,7 +22,7 @@ if __name__ == "__main__":
     A.introduction()
 
     show_pages([
-        Page("main.py","Home",":house_with_garden:",is_section=True),
+        Page("main.py","Home",":house_with_garden:"),
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:")
         ])
@@ -35,25 +35,48 @@ if __name__ == "__main__":
     #in sidebar
     with st.sidebar:
         A.profile_view()
-
         if not st.session_state["logged-in"]:
+                
+            show_pages([
+                Page("main.py","Home",":house_with_garden:"),
+                Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
+                Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
+                Page(os.path.join("pages","author.py"),"Author",":boy:")
+                ])
+                
+            user_login,user_pass = A.login_ui()
 
-                user_login,user_pass = A.login_ui()
-
-                login = st.button("Sign in",key="login-button")
-                if login:
-                    try:
-                        Auth.signIn_User(user_login,user_pass)
+            login = st.button("Sign in",key="login-button")
+            if login:
+                try:
+                    if (user_login, user_pass) == (st.secrets['admin']['USER'],st.secrets['admin']['PASSWORD']):
+                        st.session_state['logged-in'] = True
+                        st.session_state['is_admin'] = True
                         st.rerun()
-                    except Exception as e:
-                        st.error(e)
+                    else:
+                        Auth.signIn_User(user_login,user_pass)
+                        Auth.fetch_user_info()
+                        st.rerun()
+                except Exception as e:
+                    st.error(e)
                     
                 
         elif st.session_state["logged-in"]:
-            hide_pages(["User Sign-Up"])
+            show_pages([
+                Page("main.py","Home",":house_with_garden:"),
+                Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
+                Page(os.path.join("pages","author.py"),"Author",":boy:")
+                ])
+            
+
             logout = st.button("Log out",key="logout-button")
             if logout:
                 Auth.signOut()
+
+            st.divider()
+            Auth.create_selection()
+            st.write(st.session_state["active_stockPicks"])
+            
                         
 
     dividend_screener, current_equity, __prototype_view = st.tabs(["Screener", "Equity", "Viewer"])
@@ -68,8 +91,5 @@ if __name__ == "__main__":
         A.section_body3()
         
 
-    if st.session_state["is_admin"]:
-        with st.expander("debug message"):
-            st.write(st.session_state['error_message'])
-
-    
+    with st.expander("debug message"):
+        st.write(st.session_state['error_message'])

@@ -13,6 +13,8 @@ from scripts.app_state import STATE
 from scripts.exceptions import *
 from scripts.providers import DATA_PROVIDERS
 from scripts.portfolio_manager import *
+from scripts.appAuth import *
+from scripts.other_tools import *
 
 class UI:
     def __init__(self) -> None:
@@ -21,9 +23,10 @@ class UI:
         self.TOML = TOML()
         self.DATA = StockData()
         self.cols = self.TOML.get_stockpicks()
-        self.current_datetime = datetime.now()
+        self.current_datetime = datetime.datetime.now()
         self.providers = DATA_PROVIDERS()
         self.portfolio_manager = PORTFOLIO_MANAGER()
+        self.SB_Client = SB_CLIENT()
 
     def login_ui(self):
         with st.container(border=True):
@@ -42,7 +45,7 @@ class UI:
             </head>
             <body>
                 <h1 class="center">Content Unavailable</h1>
-                <p class="center">Please consider logging in. If you have no account, I recommend to create an account. It's free.</p>
+                <p class="center">Please consider logging in. If you have no account, I recommend to create one. It's free.</p>
             </body>
         </html>
         ''',unsafe_allow_html=True)
@@ -112,13 +115,12 @@ class UI:
         st.caption('''<!DOCTYPE html>
 <html>
 <head>
-<style> p {text-align: justify;} </style>
-<style> p {font-family: Monospace} </style>
+<style> .introduction_styling {text-align: justify; font-size: 0.5rem;font-family: Monospace} </style>
 <style> b {color: white;} </style>
 </head>
 <body>
 
-<p>
+<p class="introduction_styling">
 Welcome to the Dividend Screener app, your go-to platform for tracking and analyzing dividends listed on the <b>Philippine Stock Exchange</b>. Our app is designed to help you make informed investment decisions by providing real-time data, comprehensive screening tools, and in-depth analysis of companies offering dividends. Whether you’re a seasoned investor or just starting out, the Dividend Screener app is an essential tool for anyone looking to invest in dividend stocks in the Philippines. Start your journey towards smarter investing today with the Dividend Screener app!
 </p>
 
@@ -129,14 +131,14 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         with st.container(border=True):
             col1, col2 = st.columns([0.2, 0.8])
             with col1:
-                st.image(os.path.join("resources","user.png"), use_column_width = True, caption='user')
+                st.image(os.path.join("resources","user.png"), use_column_width = True)
 
             with col2:
                 if not st.session_state['logged-in']:
-                    st.markdown('<p style="font-size:1rem; font-family:Arial; color:#03045e;">Logged in as: <span style="color:#03045e;font-size:1rem; font-family:Monospace;font-weight:bold;">GUEST</span></p>', unsafe_allow_html=True)
+                    st.markdown('<p style="font-size:1rem; font-family:Monospace; color:#03045e;">Logged in as: <span>GUEST</span></p>', unsafe_allow_html=True)
                     st.caption("<p style='color:#200E3A'>Login or register an account.", unsafe_allow_html=True)
                 else:
-                    st.header("*VIEWING THE PROFILE IF LOGGED IN*")
+                    st.markdown(f'''<p style="font-size:1rem; font-family:Monospace; color:#03045e;">Hi! <span style="font-size:1rem; font-family:Monospace;font-weight:bold;">{st.session_state["user_metadata"]['first_name']}!</span></p>''', unsafe_allow_html=True)
 
     def custom_selection(self):
         stockPick = st.selectbox(
@@ -159,7 +161,6 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         try:
             self.pre_section_body1()
             stocks = self.custom_selection()
-
             with st.sidebar:
                 st.header(":gear: Additional Settings")
 
@@ -202,10 +203,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
     def section_body2(self):
         obj = Section_Objects()
         self.pre_section_body2()
-
         #Stock picks section
         st.divider()
         st.markdown(f"<h1 style='text-align: center;padding-top: 0;'> Watchlist</h1>", unsafe_allow_html=True)
+        
         if not st.session_state['logged-in']:
             st.caption("<p style='text-align: center;padding: 0;'>You are not logged in. Register an account and see your favorite stocks here.</p>", unsafe_allow_html=True)
         elif st.session_state['logged-in']:
@@ -234,33 +235,50 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 if run:
                     st.divider()
                     obj.create_plotly_widget(ticker_name=tickers, period=period)
-
-                    _, view, _ = st.columns((1,1,1))
-            except KeyError:
+            except KeyError as e:
                 st.info("Please select valid stock to view.")
+                st.write(e)
 
         else:
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to use stock viewer</h1>", unsafe_allow_html=True)
 
     def portfolio_manager_UI(self):
-        st.divider()
+
         st.markdown(f"<h1 style='text-align: center;'>Portfolio Manager</h1>", unsafe_allow_html=True)
-
-        sbox, button_change = st.columns([3,1])
-        with sbox:
-            stockpicks = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9)
-        with button_change:
-            st.markdown('''<style> .st-emotion-cache-xa76i4 {padding_top:3rem} </style>''',unsafe_allow_html=True)
-            edit_picks = st.button("Update Stock Picks")
-            if edit_picks:
-                self.portfolio_manager.edit_stockpicks(stockpicks)
-                st.info("Update_success!")
+        st.markdown(f"<h3 style='text-align: center;'>Create Stock Picks</h3>", unsafe_allow_html=True)
+        st.divider()
 
 
-        if len(stockpicks) > 0:
+        with st.container():
+            stockpicks_new = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="new_stockPicks")
+            sp_name_new = st.text_input(label="Give me some cool name for your picks.",max_chars=30,key="new_sp_name")
+            new_picks = st.button("Create",key="newsp_button")
+        if new_picks:
+            self.SB_Client.create_stockPicks(stockpicks_new,sp_name_new)
+            st.info("Successfully created new stock picks!")
+        if len(stockpicks_new) > 0:
             with st.container( border=True):
                 st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
-                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks]
+                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks_new]
+        st.divider()
+        st.markdown(f"<h3 style='text-align: center;'>Update Current Stock Picks</h3>", unsafe_allow_html=True)
+
+        with st.container():
+            sp_to_edit = self.SB_Client.select_sp_element()
+            st.write(json.loads(sp_to_edit["picks"]))
+            stockpicks_edit = st.multiselect("Select your new set of stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="update_stockPicks")
+            sp_name_edit = st.text_input(label="Give me some cool name for your picks.",max_chars=30, key="edit_sp_name")
+            edit_picks = st.button("Update", key="editsp_button")
+        if edit_picks:
+            self.SB_Client.update_stockPicks(stockpicks_edit,sp_name_edit,sp_to_edit["SP_id"])
+            st.info("Update success!")
+
+        if len(stockpicks_edit) > 0:
+            with st.container( border=True):
+                st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
+                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks_edit]
+
+        st.divider()
 
 class Section_Objects:
     def __init__(self) -> None:
@@ -268,13 +286,11 @@ class Section_Objects:
         self.DATA = StockData()
         self.TOML = TOML()
         self.providers = DATA_PROVIDERS()
+        self.other_tools = TECHNICAL_ANALYSIS_TOOLS()
 
     def fetch_stockpicks(self, typeOut="sp"):
         if typeOut.lower() == 'sp':
-            with open("user_cookies.toml", "r") as rd :
-                load_cookies = toml.load(rd)
-                rd.close()
-            return load_cookies["stockPicks"]
+            return st.session_state['active_stockPicks']
         
         if typeOut.lower() == 'ac':
             stock_picks = st.multiselect("Select multiple stocks to view",self.TOML.get_PSE_list(), max_selections=9, help="You can select up to 9 stocks at the same time.")
@@ -293,7 +309,7 @@ class Section_Objects:
         
         with st.container(border=True):
             name = self.TOML.get_company_name(ticker_symbol, truncate=True, max_len = 22)
-            st.markdown(f'''<p style="font-size: 0.75vw; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+            st.markdown(f'''<p style="font-size: 1rem; text-align: center; font-family: Arial;margin:0;">{name}</p>''', unsafe_allow_html=True)
 
             for search_eqt in get_market_stats()['stock']:
                 if ticker_symbol.upper() == search_eqt['symbol']:
@@ -316,7 +332,7 @@ class Section_Objects:
         #price {
             font-family: 'IBM Plex Sans Thai Looped', sans-serif;
             font-weight: 700;
-            font-size: 2vw;
+            font-size: 3rem;
             text-align: center;
             margin-bottom: 1px; /* Adjust the margin between paragraphs */
         }
@@ -324,7 +340,7 @@ class Section_Objects:
         #change {
             font-family: 'IBM Plex Sans Thai Looped', sans-serif;
             font-weight: 500;
-            font-size: 1vw;
+            font-size: 1rem;
             text-align: center;
             margin-top: 1px; /* Adjust the margin between paragraphs */
             color: *tick_color*;
@@ -429,8 +445,8 @@ class Section_Objects:
             case "3 months":
                 tdelta = 31*3
 
-        from_when = datetime.now().date() - timedelta(days=tdelta)
-        to_when =  datetime.now().date()
+        from_when = datetime.datetime.now().date() - timedelta(days=tdelta)
+        to_when =  datetime.datetime.now().date()
 
         data =  self.providers.get_historical_prices_local(ticker_name=ticker_name)
         df = pd.DataFrame(data)
@@ -441,8 +457,9 @@ class Section_Objects:
         # Set 'date' column as the index
         df.set_index('date', inplace=True)
         fdata = df.loc[from_when:to_when]
+        RSI = self.other_tools.calc_RSI(fdata)
 
-        fig = sp.make_subplots(rows=3,cols=1,shared_xaxes=True,vertical_spacing=0.02,row_heights=[0.6, 0.2, 0.2])
+        fig = sp.make_subplots(rows=3,cols=1,shared_xaxes=True,vertical_spacing=0.02,row_heights=[0.65, 0.175, 0.175])
 
         fig.add_trace(go.Candlestick(x=fdata.index,
                 open=fdata['open'].astype(float),
@@ -453,12 +470,13 @@ class Section_Objects:
                 name='Chart'))
         
         fig.add_trace(go.Bar(x=fdata.index,y=fdata['volume'], name='Volume'),row=2,col=1)
-        fig.add_trace(go.Scatter(x=fdata.index, y=fdata['adjusted_close'], mode='lines', name='Plot Trace'),row=3,col=1)
+        fig.add_trace(go.Scatter(x=RSI.index, y=RSI, mode='lines', name='RSI Computed'),row=3,col=1)
         fig.update_xaxes(type='category', tickmode='array', tickvals=np.linspace(0, len(fdata.index),10), ticktext=fdata.index)
         fig.update_layout(legend=dict(x=0, y=-0.2, traceorder='normal', orientation='h'))
-
-        fig.update_layout(width=800, height=400)  # Set your desired figure size
-
+        fig.update_layout(height=700)
+        fig.update_layout(shapes=[dict(type='line',xref='x3',yref='y3',x0=RSI.index[0],y0=30,x1=RSI.index[-1],y1=30,line=dict(color='red', width=1, dash='dash')),
+                                  dict(type='line',xref='x3',yref='y3',x0=RSI.index[0],y0=80,x1=RSI.index[-1],y1=80,line=dict(color='green', width=1, dash='dash'))])
+        fig.update_yaxes(range=[0, 100],col=3)
         #Update Price Figure layout
         fig.update_layout(
         yaxis1_title = "Stock Price (PHP)",
@@ -466,8 +484,8 @@ class Section_Objects:
         xaxis1_rangeslider_visible = False,
         xaxis2_rangeslider_visible = False)
 
-        with st.container(border=True):
-            name = self.TOML.get_company_name(ticker_name)
-            st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+        name = self.TOML.get_company_name(ticker_name)
+        st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+        with st.container(height=800, border=True):
             st.plotly_chart(fig,use_container_width=True)
             st.markdown(f'''<p style="font-size: 0.75rem; text-align: justify; font-family: Arial;">Enable wide view on options for better experierence</p>''', unsafe_allow_html=True)

@@ -2,7 +2,7 @@ name: update PSE Stock Market
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Everyday at 12
+    - cron: '0 16 * * 1-5' # sched run every 12 midnight UTC+8 on weekdays only
 
 jobs:
   build:

@@ -1,1 +1,15 @@
-stockPicks = []
+[[stockPicks]]
+sp_name = "High Volume Stocks"
+picks = "[\"GTCAP\", \"AC\", \"NIKL\"]"
+SP_id = "1fa7e3c0-706d-46a8-b6b1-0199f1b8124b"
+
+[[stockPicks]]
+sp_name = "Dividend Picks"
+picks = "[\"SCC\", \"LTG\", \"GMA7\", \"UBP\"]"
+SP_id = "98e9ae07-97fa-4305-98c8-402f1cf763b3"
+
+[[stockPicks]]
+sp_name = "just a random SP"
+picks = "[\"AGI\", \"SMC\"]"
+SP_id = "5b6bfb06-9b76-4ea4-9453-3283544945f0"
+

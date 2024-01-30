@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import streamlit as st
 import os, re, datetime
 
@@ -46,7 +47,7 @@ class USER_INFO_MNGR:
             "add_prov"      : self.prov,
             "add_citymuni"  : self.citymuni,
             "add_brgy"      : self.brgy,
-            "bday"          : self.bday,
+            "birthday"      : self.bday,
             "gender"        : self.gender
         }
     
@@ -54,3 +55,23 @@ class USER_INFO_MNGR:
         return f"{self.brgy}, {self.citymuni}, {self.prov}, {self.reg}"
     
 
+class TECHNICAL_ANALYSIS_TOOLS:
+    '''
+    Useful tools for calculating several TA indicators
+    '''
+
+    def __init__(self) -> None:
+        pass
+
+    def calc_RSI(self, data: pd.Series):
+        price_action = data['close'].diff()
+        price_up = price_action.copy()
+        price_down = price_action.copy()
+
+        price_up[price_up<0] = 0
+        price_down[price_down>0] = 0
+
+        avg_up = price_up.rolling(14).mean()
+        avg_down = price_down.rolling(14).mean().abs()
+
+        return 100 - (100 / (1 + (avg_up/avg_down)))

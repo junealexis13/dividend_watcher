@@ -3,7 +3,6 @@
 .vscode/*
 .streamlit/secrets.toml
 scripts/__pycache__/*
-__pycache__/*
 .streamlit/secrets.py
 
 

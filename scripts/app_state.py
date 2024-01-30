@@ -19,6 +19,12 @@ class STATE:
         if "is_admin" not in st.session_state:
             st.session_state["is_admin"] = False
 
+        if "user_metadata" not in st.session_state:
+            st.session_state["user_metadata"] = None
+
+        if "active_stockPicks" not in st.session_state:
+            st.session_state["active_stockPicks"] = None
+
     def _dev_toggle_login_state(self):
         toggle = st.checkbox('Enable logged-in state.',value = st.session_state['logged-in'])
         if toggle:
