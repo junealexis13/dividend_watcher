@@ -58,8 +58,12 @@ class SB_CLIENT:
 
     def update_stockPicks(self, stockpicks: list, stockpick_name: str, sp_id: str):
         jsonize_stockpicks = json.dumps(stockpicks)
-        self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
 
+        if stockpick_name is None:
+            self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks}).eq("SP_id",sp_id).execute()
+        elif stockpick_name is not None:
+            self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
+            
     def fetch_all_user_sp(self):
         data = self.SB_Client.table("stockpicks").select("sp_name","picks","SP_id").eq("id",self.fetch_user_info("id")).execute()
         update_picks = {"stockPicks":data.data}
@@ -73,7 +77,6 @@ class SB_CLIENT:
 
     def create_sp_rows(self):
         get_sp = toml.load(os.path.join("user_cookies.toml"))
-        print(get_sp)
 
     def fetch_user_info(self, fetch_type="md"):
         data = self.SB_Client.auth.get_user()

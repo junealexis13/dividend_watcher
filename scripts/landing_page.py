@@ -14,6 +14,7 @@ from scripts.exceptions import *
 from scripts.providers import DATA_PROVIDERS
 from scripts.portfolio_manager import *
 from scripts.appAuth import *
+from scripts.other_tools import *
 
 class UI:
     def __init__(self) -> None:
@@ -22,7 +23,7 @@ class UI:
         self.TOML = TOML()
         self.DATA = StockData()
         self.cols = self.TOML.get_stockpicks()
-        self.current_datetime = datetime.now()
+        self.current_datetime = datetime.datetime.now()
         self.providers = DATA_PROVIDERS()
         self.portfolio_manager = PORTFOLIO_MANAGER()
         self.SB_Client = SB_CLIENT()
@@ -114,13 +115,12 @@ class UI:
         st.caption('''<!DOCTYPE html>
 <html>
 <head>
-<style> p {text-align: justify;} </style>
-<style> p {font-family: Monospace} </style>
+<style> .introduction_styling {text-align: justify; font-size: 0.5rem;font-family: Monospace} </style>
 <style> b {color: white;} </style>
 </head>
 <body>
 
-<p>
+<p class="introduction_styling">
 Welcome to the Dividend Screener app, your go-to platform for tracking and analyzing dividends listed on the <b>Philippine Stock Exchange</b>. Our app is designed to help you make informed investment decisions by providing real-time data, comprehensive screening tools, and in-depth analysis of companies offering dividends. Whether you’re a seasoned investor or just starting out, the Dividend Screener app is an essential tool for anyone looking to invest in dividend stocks in the Philippines. Start your journey towards smarter investing today with the Dividend Screener app!
 </p>
 
@@ -139,7 +139,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     st.caption("<p style='color:#200E3A'>Login or register an account.", unsafe_allow_html=True)
                 else:
                     st.markdown(f'''<p style="font-size:1rem; font-family:Monospace; color:#03045e;">Hi! <span style="font-size:1rem; font-family:Monospace;font-weight:bold;">{st.session_state["user_metadata"]['first_name']}!</span></p>''', unsafe_allow_html=True)
-                    print(st.session_state["user_metadata"]["first_name"])
+
     def custom_selection(self):
         stockPick = st.selectbox(
                 'Choose what Dividend Stock to View',
@@ -235,10 +235,9 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 if run:
                     st.divider()
                     obj.create_plotly_widget(ticker_name=tickers, period=period)
-
-                    _, view, _ = st.columns((1,1,1))
-            except KeyError:
+            except KeyError as e:
                 st.info("Please select valid stock to view.")
+                st.write(e)
 
         else:
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to use stock viewer</h1>", unsafe_allow_html=True)
@@ -287,6 +286,7 @@ class Section_Objects:
         self.DATA = StockData()
         self.TOML = TOML()
         self.providers = DATA_PROVIDERS()
+        self.other_tools = TECHNICAL_ANALYSIS_TOOLS()
 
     def fetch_stockpicks(self, typeOut="sp"):
         if typeOut.lower() == 'sp':
@@ -309,7 +309,7 @@ class Section_Objects:
         
         with st.container(border=True):
             name = self.TOML.get_company_name(ticker_symbol, truncate=True, max_len = 22)
-            st.markdown(f'''<p style="font-size: 0.75vw; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+            st.markdown(f'''<p style="font-size: 1rem; text-align: center; font-family: Arial;margin:0;">{name}</p>''', unsafe_allow_html=True)
 
             for search_eqt in get_market_stats()['stock']:
                 if ticker_symbol.upper() == search_eqt['symbol']:
@@ -445,8 +445,8 @@ class Section_Objects:
             case "3 months":
                 tdelta = 31*3
 
-        from_when = datetime.now().date() - timedelta(days=tdelta)
-        to_when =  datetime.now().date()
+        from_when = datetime.datetime.now().date() - timedelta(days=tdelta)
+        to_when =  datetime.datetime.now().date()
 
         data =  self.providers.get_historical_prices_local(ticker_name=ticker_name)
         df = pd.DataFrame(data)
@@ -457,8 +457,9 @@ class Section_Objects:
         # Set 'date' column as the index
         df.set_index('date', inplace=True)
         fdata = df.loc[from_when:to_when]
+        RSI = self.other_tools.calc_RSI(fdata)
 
-        fig = sp.make_subplots(rows=3,cols=1,shared_xaxes=True,vertical_spacing=0.02,row_heights=[0.6, 0.2, 0.2])
+        fig = sp.make_subplots(rows=3,cols=1,shared_xaxes=True,vertical_spacing=0.02,row_heights=[0.65, 0.175, 0.175])
 
         fig.add_trace(go.Candlestick(x=fdata.index,
                 open=fdata['open'].astype(float),
@@ -469,12 +470,13 @@ class Section_Objects:
                 name='Chart'))
         
         fig.add_trace(go.Bar(x=fdata.index,y=fdata['volume'], name='Volume'),row=2,col=1)
-        fig.add_trace(go.Scatter(x=fdata.index, y=fdata['adjusted_close'], mode='lines', name='Plot Trace'),row=3,col=1)
+        fig.add_trace(go.Scatter(x=RSI.index, y=RSI, mode='lines', name='RSI Computed'),row=3,col=1)
         fig.update_xaxes(type='category', tickmode='array', tickvals=np.linspace(0, len(fdata.index),10), ticktext=fdata.index)
         fig.update_layout(legend=dict(x=0, y=-0.2, traceorder='normal', orientation='h'))
-
-        fig.update_layout(width=800, height=400)  # Set your desired figure size
-
+        fig.update_layout(height=700)
+        fig.update_layout(shapes=[dict(type='line',xref='x3',yref='y3',x0=RSI.index[0],y0=30,x1=RSI.index[-1],y1=30,line=dict(color='red', width=1, dash='dash')),
+                                  dict(type='line',xref='x3',yref='y3',x0=RSI.index[0],y0=80,x1=RSI.index[-1],y1=80,line=dict(color='green', width=1, dash='dash'))])
+        fig.update_yaxes(range=[0, 100],col=3)
         #Update Price Figure layout
         fig.update_layout(
         yaxis1_title = "Stock Price (PHP)",
@@ -482,8 +484,8 @@ class Section_Objects:
         xaxis1_rangeslider_visible = False,
         xaxis2_rangeslider_visible = False)
 
-        with st.container(border=True):
-            name = self.TOML.get_company_name(ticker_name)
-            st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+        name = self.TOML.get_company_name(ticker_name)
+        st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">{name}</p>''', unsafe_allow_html=True)
+        with st.container(height=800, border=True):
             st.plotly_chart(fig,use_container_width=True)
             st.markdown(f'''<p style="font-size: 0.75rem; text-align: justify; font-family: Arial;">Enable wide view on options for better experierence</p>''', unsafe_allow_html=True)
