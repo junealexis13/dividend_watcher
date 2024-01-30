@@ -22,7 +22,7 @@ if __name__ == "__main__":
     A.introduction()
 
     show_pages([
-        Page("main.py","Home",":house_with_garden:"),
+        Page("main.py","Home",":house_with_garden:", is_section=True),
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:")
         ])
@@ -38,32 +38,32 @@ if __name__ == "__main__":
         if not st.session_state["logged-in"]:
                 
             show_pages([
-                Page("main.py","Home",":house_with_garden:"),
+                Page("main.py","Home",":house_with_garden:", is_section=True),
                 Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
                 Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
                 Page(os.path.join("pages","author.py"),"Author",":boy:")
                 ])
-                
-            user_login,user_pass = A.login_ui()
+            with st.form("user-login-main"):
+                user_login,user_pass = A.login_ui()
 
-            login = st.button("Sign in",key="login-button")
-            if login:
-                try:
-                    if (user_login, user_pass) == (st.secrets['admin']['USER'],st.secrets['admin']['PASSWORD']):
-                        st.session_state['logged-in'] = True
-                        st.session_state['is_admin'] = True
-                        st.rerun()
-                    else:
-                        Auth.signIn_User(user_login,user_pass)
-                        Auth.fetch_user_info()
-                        st.rerun()
-                except Exception as e:
-                    st.error(e)
+                login = st.form_submit_button(label="Sign in")
+                if login:
+                    try:
+                        if (user_login, user_pass) == (st.secrets['admin']['USER'],st.secrets['admin']['PASSWORD']):
+                            st.session_state['logged-in'] = True
+                            st.session_state['is_admin'] = True
+                            st.rerun()
+                        else:
+                            Auth.signIn_User(user_login,user_pass)
+                            Auth.fetch_user_info()
+                            st.rerun()
+                    except Exception as e:
+                        st.error(e)
                     
                 
         elif st.session_state["logged-in"]:
             show_pages([
-                Page("main.py","Home",":house_with_garden:"),
+                Page("main.py","Home",":house_with_garden:", is_section=True),
                 Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
                 Page(os.path.join("pages","author.py"),"Author",":boy:")
                 ])

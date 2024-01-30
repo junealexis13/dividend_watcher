@@ -141,13 +141,16 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     st.markdown(f'''<p style="font-size:1rem; font-family:Monospace; color:#03045e;">Hi! <span style="font-size:1rem; font-family:Monospace;font-weight:bold;">{st.session_state["user_metadata"]['first_name']}!</span></p>''', unsafe_allow_html=True)
 
     def custom_selection(self):
-        stockPick = st.selectbox(
-                'Choose what Dividend Stock to View',
-                self.TOML.get_PSE_list(),index=None,
-                help='Choose what Dividend Stock to show. Make sure the stock ticker is valid.')
-        
-        st.session_state['stock_on_view'] = stockPick
-        return stockPick
+        with st.form('custom-divstock-view'):
+            stockPick = st.selectbox(
+                    'Choose what Dividend Stock to View',
+                    self.TOML.get_PSE_list(),index=None,
+                    help='Choose what Dividend Stock to show. Make sure the stock ticker is valid.')
+            
+            st.session_state['stock_on_view'] = stockPick
+            send = st.form_submit_button('View')
+            if send:
+                return stockPick
 
     def pre_section_body1(self):
         st.divider()
@@ -216,25 +219,23 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
         #View Active Stocks section
         st.markdown(f"<h1 style='text-align: center;padding-top: 0;'> Equity Viewer</h1>", unsafe_allow_html=True)
-        activePicks = obj.fetch_stockpicks(typeOut="ac") #typeOut reflects the type of fetch_ command
-
-        obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
+        with st.form('select-active-chart-view'):
+            activePicks = obj.fetch_stockpicks(typeOut="ac") #typeOut reflects the type of fetch_ command
+            submit = st.form_submit_button("View stocks")
+            if submit:
+                obj.create_watchlist(len(activePicks)//3,len(activePicks)%3,activePicks,typeOut="ac")
 
     def section_body3(self):
         if st.session_state['logged-in']:
-            top1, top2= st.columns([.5,.5])
             obj = Section_Objects()
             try:
-                with top1:
+                with st.form("stock-view-form"):
                     tickers = st.selectbox("View stock price",self.TOML.get_PSE_list(),index=None)
-                    run = st.button(label="\nshow\n")
-
-                with top2:
                     period = st.radio("Choose period",options=["1 year","9 months","6 months","3 months"])
-        
-                if run:
-                    st.divider()
-                    obj.create_plotly_widget(ticker_name=tickers, period=period)
+                    run = st.form_submit_button(label="\nshow\n",)
+                    if run:
+                        st.divider()
+                        obj.create_plotly_widget(ticker_name=tickers, period=period)
             except KeyError as e:
                 st.info("Please select valid stock to view.")
                 st.write(e)
@@ -248,14 +249,13 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         st.markdown(f"<h3 style='text-align: center;'>Create Stock Picks</h3>", unsafe_allow_html=True)
         st.divider()
 
-
-        with st.container():
+        with st.form("create-stockpicks"):
             stockpicks_new = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="new_stockPicks")
             sp_name_new = st.text_input(label="Give me some cool name for your picks.",max_chars=30,key="new_sp_name")
-            new_picks = st.button("Create",key="newsp_button")
-        if new_picks:
-            self.SB_Client.create_stockPicks(stockpicks_new,sp_name_new)
-            st.info("Successfully created new stock picks!")
+            new_picks = st.form_submit_button("Create")
+            if new_picks:
+                self.SB_Client.create_stockPicks(stockpicks_new,sp_name_new)
+                st.info("Successfully created new stock picks!")
         if len(stockpicks_new) > 0:
             with st.container( border=True):
                 st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
@@ -263,15 +263,20 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         st.divider()
         st.markdown(f"<h3 style='text-align: center;'>Update Current Stock Picks</h3>", unsafe_allow_html=True)
 
-        with st.container():
-            sp_to_edit = self.SB_Client.select_sp_element()
-            st.write(json.loads(sp_to_edit["picks"]))
+
+        sp_to_edit = self.SB_Client.select_sp_element()
+        st.write(json.loads(sp_to_edit["picks"]))
+        st.write(sp_to_edit['sp_name'])
+        with st.form("update-picks"):
             stockpicks_edit = st.multiselect("Select your new set of stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="update_stockPicks")
-            sp_name_edit = st.text_input(label="Give me some cool name for your picks.",max_chars=30, key="edit_sp_name")
-            edit_picks = st.button("Update", key="editsp_button")
-        if edit_picks:
-            self.SB_Client.update_stockPicks(stockpicks_edit,sp_name_edit,sp_to_edit["SP_id"])
-            st.info("Update success!")
+            sp_name_edit = st.text_input(label="Change Name [Leave None if you dont want to change]",max_chars=30)
+            edit_picks = st.form_submit_button("Update")
+            if edit_picks:
+                if sp_name_edit == '' or sp_name_edit is  None:
+                    self.SB_Client.update_stockPicks(stockpicks_edit,sp_to_edit['sp_name'],sp_to_edit["SP_id"])
+                else:
+                    self.SB_Client.update_stockPicks(stockpicks_edit,sp_name_edit,sp_to_edit["SP_id"])
+                st.info("Update success!")
 
         if len(stockpicks_edit) > 0:
             with st.container( border=True):
@@ -309,7 +314,7 @@ class Section_Objects:
         
         with st.container(border=True):
             name = self.TOML.get_company_name(ticker_symbol, truncate=True, max_len = 22)
-            st.markdown(f'''<p style="font-size: 1rem; text-align: center; font-family: Arial;margin:0;">{name}</p>''', unsafe_allow_html=True)
+            st.markdown(f'''<p style="font-size: 0.75rem; text-align: center; font-family: Arial;margin:0;">{name}</p>''', unsafe_allow_html=True)
 
             for search_eqt in get_market_stats()['stock']:
                 if ticker_symbol.upper() == search_eqt['symbol']:
