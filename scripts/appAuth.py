@@ -60,7 +60,8 @@ class SB_CLIENT:
     def update_stockPicks(self, stockpicks: list, stockpick_name: str, sp_id: str):
         jsonize_stockpicks = json.dumps(stockpicks)
         self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
-
+        self.fetch_all_user_sp()
+        
     def fetch_all_user_sp(self):
         data = self.SB_Client.table("stockpicks").select("sp_name","picks","SP_id").eq("id",self.fetch_user_info("id")).execute()
         update_picks = {"stockPicks":data.data}

@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
-import os, re, datetime
+import os, re, datetime, toml
+
 
 class ADDRESS_TOOLS:
     '''
@@ -75,3 +76,4 @@ class TECHNICAL_ANALYSIS_TOOLS:
         avg_down = price_down.rolling(14).mean().abs()
 
         return 100 - (100 / (1 + (avg_up/avg_down)))
+    

@@ -27,6 +27,7 @@ class UI:
         self.providers = DATA_PROVIDERS()
         self.portfolio_manager = PORTFOLIO_MANAGER()
         self.SB_Client = SB_CLIENT()
+        self.ta_tools = TECHNICAL_ANALYSIS_TOOLS()
 
     def login_ui(self):
         with st.container(border=True):
@@ -203,6 +204,8 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 # st.warning("There are errors gathering equity data")
                 pass
             
+        st.divider()
+
     def section_body2(self):
         obj = Section_Objects()
         self.pre_section_body2()
@@ -214,7 +217,8 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             st.caption("<p style='text-align: center;padding: 0;'>You are not logged in. Register an account and see your favorite stocks here.</p>", unsafe_allow_html=True)
         elif st.session_state['logged-in']:
             stockPicks = obj.fetch_stockpicks(typeOut='sp')
-            obj.create_watchlist(len(stockPicks)//3,len(stockPicks)%3,stockPicks, typeOut="sp")
+            if stockPicks is not None:
+                obj.create_watchlist(len(stockPicks)//3,len(stockPicks)%3,stockPicks, typeOut="sp")
         st.divider()
 
         #View Active Stocks section
@@ -261,29 +265,30 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
                 [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks_new]
         st.divider()
-        st.markdown(f"<h3 style='text-align: center;'>Update Current Stock Picks</h3>", unsafe_allow_html=True)
 
 
-        sp_to_edit = self.SB_Client.select_sp_element()
-        st.write(json.loads(sp_to_edit["picks"]))
-        st.write(sp_to_edit['sp_name'])
-        with st.form("update-picks"):
-            stockpicks_edit = st.multiselect("Select your new set of stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="update_stockPicks")
-            sp_name_edit = st.text_input(label="Change Name [Leave None if you dont want to change]",max_chars=30)
-            edit_picks = st.form_submit_button("Update")
-            if edit_picks:
-                if sp_name_edit == '' or sp_name_edit is  None:
-                    self.SB_Client.update_stockPicks(stockpicks_edit,sp_to_edit['sp_name'],sp_to_edit["SP_id"])
-                else:
-                    self.SB_Client.update_stockPicks(stockpicks_edit,sp_name_edit,sp_to_edit["SP_id"])
-                st.info("Update success!")
+        if st.session_state['active_stockPicks'] is not None:
+            st.markdown(f"<h3 style='text-align: center;'>Update Current Stock Picks</h3>", unsafe_allow_html=True)
+            sp_to_edit = self.SB_Client.select_sp_element()
+            st.write(json.loads(sp_to_edit["picks"]))
+            st.write(sp_to_edit['sp_name'])
+            with st.form("update-picks"):
+                stockpicks_edit = st.multiselect("Select your new set of stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="update_stockPicks")
+                sp_name_edit = st.text_input(label="Change Name [Leave None if you dont want to change]",max_chars=30)
+                edit_picks = st.form_submit_button("Update")
+                if edit_picks:
+                    if sp_name_edit == '' or sp_name_edit is  None:
+                        self.SB_Client.update_stockPicks(stockpicks_edit,sp_to_edit['sp_name'],sp_to_edit["SP_id"])
+                    else:
+                        self.SB_Client.update_stockPicks(stockpicks_edit,sp_name_edit,sp_to_edit["SP_id"])
+                    st.info("Update success!")
 
-        if len(stockpicks_edit) > 0:
-            with st.container( border=True):
-                st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
-                [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks_edit]
+            if len(stockpicks_edit) > 0:
+                with st.container( border=True):
+                    st.markdown(f"<h3 style='text-align: center;'>Your stock picks</h3>", unsafe_allow_html=True)
+                    [st.write(f"{x} - {self.TOML.get_company_name(x)}") for x in stockpicks_edit]
 
-        st.divider()
+            st.divider()
 
 class Section_Objects:
     def __init__(self) -> None:

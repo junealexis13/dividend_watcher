@@ -1,15 +1,5 @@
 [[stockPicks]]
-sp_name = "High Volume Stocks"
-picks = "[\"GTCAP\", \"AC\", \"NIKL\"]"
-SP_id = "1fa7e3c0-706d-46a8-b6b1-0199f1b8124b"
-
-[[stockPicks]]
-sp_name = "Dividend Picks"
-picks = "[\"SCC\", \"LTG\", \"GMA7\", \"UBP\"]"
-SP_id = "98e9ae07-97fa-4305-98c8-402f1cf763b3"
-
-[[stockPicks]]
-sp_name = ""
-picks = "[\"FILRT\", \"AREIT\", \"DDMPR\", \"VREIT\"]"
-SP_id = "18eb6056-ee3d-4346-b410-dd5d72ba6468"
+sp_name = "New Faves"
+picks = "[\"LTG\", \"SCC\", \"DMC\", \"PLC\", \"PGOLD\", \"SHNG\", \"CREIT\", \"DDMPR\"]"
+SP_id = "b45ae8ed-c8d8-440f-a5a8-a1409b085a9b"
 

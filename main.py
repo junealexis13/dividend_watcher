@@ -74,11 +74,15 @@ if __name__ == "__main__":
                 Auth.signOut()
 
             st.divider()
-            Auth.create_selection()
-            st.write(st.session_state["active_stockPicks"])
+            if st.session_state['active_stockPicks'] is not None:
+                Auth.create_selection()
+                st.write(st.session_state["active_stockPicks"])
+            else:
+                st.write("No Stockpicks Detected. Consider creating one.")
+                create_sp = st.button("Create now")
+                if create_sp:
+                    st.switch_page(os.path.join("pages","manage_portfolio.py"))
             
-                        
-
     dividend_screener, current_equity, __prototype_view = st.tabs(["Screener", "Equity", "Viewer"])
     
     with dividend_screener:

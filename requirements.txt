@@ -9,3 +9,4 @@ toml==0.10.2
 eod==0.2.1
 plotly==5.18.0
 lxml==5.1.0
+streamlit-calendar==1.1.0
