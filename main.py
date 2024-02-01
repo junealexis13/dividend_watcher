@@ -83,15 +83,18 @@ if __name__ == "__main__":
                 if create_sp:
                     st.switch_page(os.path.join("pages","manage_portfolio.py"))
             
-    dividend_screener, current_equity, __prototype_view = st.tabs(["Screener", "Equity", "Viewer"])
+    wallet, dividend_screener, current_equity, viewer = st.tabs(["Wallet","Screener", "Equity", "Viewer"])
     
+    with wallet:
+        pass
+
     with dividend_screener:
         A.section_body1()
 
     with current_equity:
         A.section_body2()
 
-    with __prototype_view:
+    with viewer:
         A.section_body3()
         
 
