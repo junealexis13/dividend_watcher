@@ -290,6 +290,19 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
             st.divider()
 
+    def wallet_manager(self):
+        if not st.session_state["logged-in"]:
+            st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">You are not logged in.</p>''', unsafe_allow_html=True)
+        else:
+            with st.form(key='get-wallet'):
+                if st.session_state['user_wallet'] is not None:
+                    wallet = st.selectbox('Select your active wallet.',options=st.session_state['user_wallet'], index=0)
+                else:
+                    st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">No Wallet Detected</p>''', unsafe_allow_html=True)
+                    load_wallet = st.form_submit_button('Create one',)
+                    if load_wallet:
+                        st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
+
 class Section_Objects:
     def __init__(self) -> None:
         #Fetch recent market data

@@ -119,14 +119,14 @@ class SB_CLIENT:
         data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
         update_picks = {"stockPicks":data.data}
 
-        if len(data) is != 0 or data is not None:
+        if len(data) != 0 or data is not None:
             st.session_state["user_transactions"] = update_picks
 
     def fetch_all_user_transactions(self):
         data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
         update_picks = {"stockPicks":data.data}
 
-        if len(data) is != 0 or data is not None:
+        if len(data) != 0 or data is not None:
             st.session_state["user_transactions"] = update_picks
 
     def create_wallet(self, wallet_name: str):

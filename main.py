@@ -86,7 +86,7 @@ if __name__ == "__main__":
     wallet, dividend_screener, current_equity, viewer = st.tabs(["Wallet","Screener", "Equity", "Viewer"])
     
     with wallet:
-        pass
+        A.wallet_manager()
 
     with dividend_screener:
         A.section_body1()
