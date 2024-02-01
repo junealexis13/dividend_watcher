@@ -25,6 +25,12 @@ class STATE:
         if "active_stockPicks" not in st.session_state:
             st.session_state["active_stockPicks"] = None
 
+        if "user_wallet" not in st.session_state:
+            st.session_state["user_wallet"] = None
+
+        if "user_transactions" not in st.session_state:
+            st.session_state["user_transactions"] = None
+
     def _dev_toggle_login_state(self):
         toggle = st.checkbox('Enable logged-in state.',value = st.session_state['logged-in'])
         if toggle:

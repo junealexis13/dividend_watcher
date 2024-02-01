@@ -89,8 +89,7 @@ class SB_CLIENT:
             case "id":
                 return user_dict.id
 
-        
-            
+
     def create_selection(self):
         try:
             with open(os.path.join("user_cookies.toml"),"r") as rd:
@@ -115,3 +114,25 @@ class SB_CLIENT:
                 selection = [d for d in picks if d['sp_name'] == sel_picks]
                 rd.close()
                 return selection[0]
+            
+    def fetch_all_user_transactions(self):
+        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
+        update_picks = {"stockPicks":data.data}
+
+        if len(data) is != 0 or data is not None:
+            st.session_state["user_transactions"] = update_picks
+
+    def fetch_all_user_transactions(self):
+        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
+        update_picks = {"stockPicks":data.data}
+
+        if len(data) is != 0 or data is not None:
+            st.session_state["user_transactions"] = update_picks
+
+    def create_wallet(self, wallet_name: str):
+            self.SB_Client.table("Wallet").insert({"wallet_name": wallet_name}).execute()
+
+    def update_stockPicks(self, stockpicks: list, stockpick_name: str, sp_id: str):
+        jsonize_stockpicks = json.dumps(stockpicks)
+        self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
+        self.fetch_all_user_sp()
