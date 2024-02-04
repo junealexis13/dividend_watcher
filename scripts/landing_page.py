@@ -251,7 +251,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         st.markdown(f"<h3 style='text-align: center;'>Create Stock Picks</h3>", unsafe_allow_html=True)
         st.divider()
 
-        with st.form("create-stockpicks"):
+        with st.form("create-stockpicks-main"):
             stockpicks_new = st.multiselect("Select your stock picks",self.TOML.get_PSE_list(),placeholder="Select ticker names...", max_selections=9, key="new_stockPicks")
             sp_name_new = st.text_input(label="Give me some cool name for your picks.",max_chars=30,key="new_sp_name")
             new_picks = st.form_submit_button("Create")
@@ -297,10 +297,9 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 self.SB_Client.create_wallet(wallet_name)
                 st.info("Your wallet has been created!")
 
-        
     def wallet_manager(self):
         if not st.session_state["logged-in"]:
-            st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">You are not logged in.</p>''', unsafe_allow_html=True)
+            st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to monitor your wallet stats</h1>", unsafe_allow_html=True)
         else:
             with st.form(key='get-wallet'):
                 if st.session_state['user_wallet'] is not None:
@@ -310,6 +309,25 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     load_wallet = st.form_submit_button('Create one',)
                     if load_wallet:
                         st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
+
+    def transaction_manager(self):
+        buy_col , sell_col = st.columns([1,1], gap="small")
+        with buy_col:
+            with st.form(key="tx-manager-buy"):
+                st.markdown(f"<h1 style='text-align: center;padding-top: 0; color: #1eedd1; font-size: 2rem;'>Buy</h1>", unsafe_allow_html=True)
+                choose_stock_buy = st.selectbox("Equity symbol",self.TOML.get_PSE_list())
+                submit_buy = st.form_submit_button()
+                if submit_buy:
+                    st.write("BOUGHT!")
+        with sell_col:
+            with st.form(key="tx-manager-sell"):
+                st.markdown(f"<h1 style='text-align: center;padding-top: 0; color: #bf51a8; font-size: 2rem;'>Sell</h1>", unsafe_allow_html=True)
+                choose_stock_sell = st.selectbox("Equity symbol",self.TOML.get_PSE_list())
+                submit_sell = st.form_submit_button()
+                if submit_sell:
+                    st.write("SOLD!")
+
+
 
 class Section_Objects:
     def __init__(self) -> None:

@@ -46,8 +46,14 @@ with st.sidebar:
             except Exception as e:
                 st.error(e)
 
-if st.session_state["logged-in"]:
-    UI.portfolio_manager_UI()
-else:
-    st.divider()
-    UI.content_unavailable()
+pm, tx = st.tabs(["Portfolio Manager","Wallet Transactions"])
+with pm:
+    if st.session_state["logged-in"]:
+        UI.portfolio_manager_UI()
+    else:
+        st.divider()
+        UI.content_unavailable()
+
+with tx:
+    if st.session_state["logged-in"]:
+        UI.transaction_manager()

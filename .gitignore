@@ -4,7 +4,7 @@
 .streamlit/secrets.toml
 scripts/__pycache__/*
 .streamlit/secrets.py
-
+user_cookies.toml
 
 #GITHUB actions
 __pycache__/
