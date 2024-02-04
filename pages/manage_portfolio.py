@@ -7,7 +7,6 @@ CONFIGS = STATE()
 CONFIGS.set_page_config()
 
 UI = UI()
-MNGR = PORTFOLIO_MANAGER()
 Auth = SB_CLIENT()
 
  #Landing Page

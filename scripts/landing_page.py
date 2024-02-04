@@ -12,7 +12,6 @@ from scripts.data_parser import StockData
 from scripts.app_state import STATE
 from scripts.exceptions import *
 from scripts.providers import DATA_PROVIDERS
-from scripts.portfolio_manager import *
 from scripts.appAuth import *
 from scripts.other_tools import *
 
@@ -25,7 +24,6 @@ class UI:
         self.cols = self.TOML.get_stockpicks()
         self.current_datetime = datetime.datetime.now()
         self.providers = DATA_PROVIDERS()
-        self.portfolio_manager = PORTFOLIO_MANAGER()
         self.SB_Client = SB_CLIENT()
         self.ta_tools = TECHNICAL_ANALYSIS_TOOLS()
 
@@ -290,6 +288,16 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
             st.divider()
 
+        st.markdown(f"<h3 style='text-align: center;'>Create your custom wallet</h3>", unsafe_allow_html=True)
+
+        with st.form("create-custom-wallet"):
+            wallet_name = st.text_input("Your wallet name", max_chars=40)
+            create_new_wallet = st.form_submit_button(label="Create new wallet")
+            if create_new_wallet:
+                self.SB_Client.create_wallet(wallet_name)
+                st.info("Your wallet has been created!")
+
+        
     def wallet_manager(self):
         if not st.session_state["logged-in"]:
             st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">You are not logged in.</p>''', unsafe_allow_html=True)

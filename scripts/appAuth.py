@@ -131,8 +131,11 @@ class SB_CLIENT:
 
     def create_wallet(self, wallet_name: str):
             self.SB_Client.table("Wallet").insert({"wallet_name": wallet_name}).execute()
+            self.fetch_all_user_wallet()
 
-    def update_stockPicks(self, stockpicks: list, stockpick_name: str, sp_id: str):
-        jsonize_stockpicks = json.dumps(stockpicks)
-        self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
-        self.fetch_all_user_sp()
+    def fetch_all_user_wallet(self):
+        data = self.SB_Client.table("Wallet").select("*").eq("user_id",self.fetch_user_info("id")).execute()
+        update_picks = {"wallet":data.data}
+
+        if len(data) != 0 or data is not None:
+            st.session_state["user_wallet"] = update_picks
