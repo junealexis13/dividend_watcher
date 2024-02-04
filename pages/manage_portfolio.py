@@ -13,6 +13,12 @@ Auth = SB_CLIENT()
  #Landing Page
 st.image(r"resources/dividend_header2.png")
 
+show_pages([
+    Page("main.py","Home",":house_with_garden:", is_section=True),
+    Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
+    Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:")
+    ])
+
 
 with st.sidebar:
     if st.session_state["logged-in"]:

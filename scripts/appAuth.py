@@ -55,11 +55,13 @@ class SB_CLIENT:
     def create_stockPicks(self, stockpicks: list, stockpick_name: str):
         jsonize_stockpicks = json.dumps(stockpicks)
         self.SB_Client.table("stockpicks").insert({"picks": jsonize_stockpicks, "sp_name": stockpick_name}).execute()
+        self.fetch_all_user_sp()
 
     def update_stockPicks(self, stockpicks: list, stockpick_name: str, sp_id: str):
         jsonize_stockpicks = json.dumps(stockpicks)
         self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
-
+        self.fetch_all_user_sp()
+        
     def fetch_all_user_sp(self):
         data = self.SB_Client.table("stockpicks").select("sp_name","picks","SP_id").eq("id",self.fetch_user_info("id")).execute()
         update_picks = {"stockPicks":data.data}
@@ -73,7 +75,6 @@ class SB_CLIENT:
 
     def create_sp_rows(self):
         get_sp = toml.load(os.path.join("user_cookies.toml"))
-        print(get_sp)
 
     def fetch_user_info(self, fetch_type="md"):
         data = self.SB_Client.auth.get_user()
@@ -87,7 +88,8 @@ class SB_CLIENT:
                 return user_dict.user_metadata
             case "id":
                 return user_dict.id
-            
+
+
     def create_selection(self):
         try:
             with open(os.path.join("user_cookies.toml"),"r") as rd:
@@ -112,3 +114,25 @@ class SB_CLIENT:
                 selection = [d for d in picks if d['sp_name'] == sel_picks]
                 rd.close()
                 return selection[0]
+            
+    def fetch_all_user_transactions(self):
+        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
+        update_picks = {"stockPicks":data.data}
+
+        if len(data) != 0 or data is not None:
+            st.session_state["user_transactions"] = update_picks
+
+    def fetch_all_user_transactions(self):
+        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
+        update_picks = {"stockPicks":data.data}
+
+        if len(data) != 0 or data is not None:
+            st.session_state["user_transactions"] = update_picks
+
+    def create_wallet(self, wallet_name: str):
+            self.SB_Client.table("Wallet").insert({"wallet_name": wallet_name}).execute()
+
+    def update_stockPicks(self, stockpicks: list, stockpick_name: str, sp_id: str):
+        jsonize_stockpicks = json.dumps(stockpicks)
+        self.SB_Client.table("stockpicks").update({"picks": jsonize_stockpicks,"sp_name":stockpick_name}).eq("SP_id",sp_id).execute()
+        self.fetch_all_user_sp()

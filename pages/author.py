@@ -7,13 +7,13 @@ st.image(r"resources/dividend_header2.png")
 
 if st.session_state['logged-in']:
     show_pages([
-        Page("main.py","Home",":house_with_garden:"),
+        Page("main.py","Home",":house_with_garden:", is_section=True),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
         Page(os.path.join("pages","author.py"),"Author",":boy:")
         ])
 else:
     show_pages([
-        Page("main.py","Home",":house_with_garden:"),
+        Page("main.py","Home",":house_with_garden:", is_section=True),
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
         Page(os.path.join("pages","author.py"),"Author",":boy:")
@@ -43,9 +43,9 @@ st.markdown("<p class='center_title title_styling'>About the author</p>", unsafe
 st.divider()
 
 with st.container(border=False):
-    _, mid, _ = st.columns([1,1,1])
+    _, mid, _ = st.columns([1,.75,1])
     with mid:
-        st.image(os.path.join("resources","dp.png")) 
+        st.image(os.path.join("resources","dp.png"),use_column_width=True) 
     st.markdown('''<p class="center_title header_styling" >Hi guys👋! I am <b>June Alexis</b></p>''', unsafe_allow_html=True)
     st.markdown("<p class='center_title caption_styling'>Just a nobody creating something for anybody.</p>", unsafe_allow_html=True)
     st.divider()
