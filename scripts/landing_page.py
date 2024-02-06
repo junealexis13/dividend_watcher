@@ -303,11 +303,15 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
         else:
             with st.form(key='get-wallet'):
                 if st.session_state['user_wallet'] is not None:
-                    wallet = st.selectbox('Select your active wallet.',options=st.session_state['user_wallet'], index=0)
+                    wallet = st.selectbox('Select your active wallet.',options=[x['wallet_name'] for x in st.session_state['user_wallet']['wallet']], index=0)
+                    load_wallet = st.form_submit_button('Set as active')
+                    if load_wallet:
+                        st.session_state['active_wallet'] = [x for x in st.session_state['user_wallet']['wallet'] if x['wallet_name'] == wallet]
+                        st.info(f"Active Wallet Set!")
                 else:
                     st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">No Wallet Detected</p>''', unsafe_allow_html=True)
-                    load_wallet = st.form_submit_button('Create one',)
-                    if load_wallet:
+                    create_wallet = st.form_submit_button('Create one',)
+                    if create_wallet:
                         st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
 
     def transaction_manager(self):
@@ -316,18 +320,23 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             with st.form(key="tx-manager-buy"):
                 st.markdown(f"<h1 style='text-align: center;padding-top: 0; color: #1eedd1; font-size: 2rem;'>Buy</h1>", unsafe_allow_html=True)
                 choose_stock_buy = st.selectbox("Equity symbol",self.TOML.get_PSE_list())
+                pps_buy = st.text_input("Price per-share")
+                volume_buy = st.text_input("Share volume")
                 submit_buy = st.form_submit_button()
                 if submit_buy:
-                    st.write("BOUGHT!")
+                    self.SB_Client.create_user_transactions('buy',choose_stock_buy,price_per_share=(pps_buy),volume=int(volume_buy),wallet_id=st.session_state['active_wallet'][0]['wallet_id'])
+                    st.info(f"Bought {volume_buy} shares of {choose_stock_buy} for ₱{int(volume_buy)*float(pps_buy):,.2f}")
+
         with sell_col:
             with st.form(key="tx-manager-sell"):
                 st.markdown(f"<h1 style='text-align: center;padding-top: 0; color: #bf51a8; font-size: 2rem;'>Sell</h1>", unsafe_allow_html=True)
                 choose_stock_sell = st.selectbox("Equity symbol",self.TOML.get_PSE_list())
+                pps_sell = st.text_input("Price per-share")
+                volume_sell = st.text_input("Share volume")
                 submit_sell = st.form_submit_button()
                 if submit_sell:
-                    st.write("SOLD!")
-
-
+                    self.SB_Client.create_user_transactions('sell',choose_stock_sell,price_per_share=pps_sell,volume=int(volume_sell),wallet_id=st.session_state['active_wallet'][0]['wallet_id'])
+                    st.info(f"Sold {volume_sell} shares of {choose_stock_sell} for ₱{int(volume_sell)*float(pps_sell):,.2f}")
 
 class Section_Objects:
     def __init__(self) -> None:

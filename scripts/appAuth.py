@@ -1,7 +1,9 @@
 import toml, os, json
+from datetime import datetime
 import hashlib
 import streamlit as st
 from supabase import create_client, Client
+from typing import Literal
 
 
 
@@ -114,28 +116,26 @@ class SB_CLIENT:
                 selection = [d for d in picks if d['sp_name'] == sel_picks]
                 rd.close()
                 return selection[0]
-            
-    def fetch_all_user_transactions(self):
-        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
-        update_picks = {"stockPicks":data.data}
-
-        if len(data) != 0 or data is not None:
-            st.session_state["user_transactions"] = update_picks
-
-    def fetch_all_user_transactions(self):
-        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
-        update_picks = {"stockPicks":data.data}
-
-        if len(data) != 0 or data is not None:
-            st.session_state["user_transactions"] = update_picks
 
     def create_wallet(self, wallet_name: str):
-            self.SB_Client.table("Wallet").insert({"wallet_name": wallet_name}).execute()
-            self.fetch_all_user_wallet()
+        self.SB_Client.table("Wallet").insert({"wallet_name": wallet_name}).execute()
+        self.fetch_all_user_wallet()
 
     def fetch_all_user_wallet(self):
         data = self.SB_Client.table("Wallet").select("*").eq("user_id",self.fetch_user_info("id")).execute()
         update_picks = {"wallet":data.data}
 
-        if len(data) != 0 or data is not None:
+        if len(update_picks) != 0 or data is not None:
             st.session_state["user_wallet"] = update_picks
+
+    def fetch_all_user_transactions(self):
+        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
+        update_picks = {"stockPicks":data.data}
+
+        if len(update_picks) != 0 or data is not None:
+            st.session_state["user_transactions"] = update_picks
+
+    def create_user_transactions(self,tx_type: Literal["buy", "sell"], equity: str, price_per_share: float, volume: int, wallet_id: str):
+        self.SB_Client.table("Stocks_Transactions").insert({"wallet": wallet_id, "pps":price_per_share, "tx_type": tx_type, "equity": equity, "volume":volume
+                                                            , "id": self.fetch_user_info("id")}).execute()
+        self.fetch_all_user_wallet()

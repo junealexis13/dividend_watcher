@@ -28,17 +28,10 @@ class STATE:
         if "user_wallet" not in st.session_state:
             st.session_state["user_wallet"] = None
 
+        if "active_wallet" not in st.session_state:
+            st.session_state["active_wallet"] = None
         if "user_transactions" not in st.session_state:
             st.session_state["user_transactions"] = None
-
-    def _dev_toggle_login_state(self):
-        toggle = st.checkbox('Enable logged-in state.',value = st.session_state['logged-in'])
-        if toggle:
-            st.session_state['logged-in'] = True
-        else:
-            st.session_state['logged-in'] = False
-        st.write(st.session_state['logged-in'])
-
 
     def set_page_config(self):
         st.set_page_config(layout='centered',page_title='PSE-Div Screener',page_icon=os.path.join("resources","page_icon.ico"))
