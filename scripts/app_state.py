@@ -3,7 +3,9 @@ import os
 class STATE:
     def __init__(self) -> None:
         #Create a custom states. Initial States
+        pass
 
+    def __init_states(self):
         if 'logged-in' not in st.session_state:
             st.session_state['logged-in'] = False
 
@@ -30,6 +32,7 @@ class STATE:
 
         if "active_wallet" not in st.session_state:
             st.session_state["active_wallet"] = None
+
         if "user_transactions" not in st.session_state:
             st.session_state["user_transactions"] = None
 
