@@ -1,11 +1,12 @@
 import streamlit as st
 import os
+
 class STATE:
     def __init__(self) -> None:
         #Create a custom states. Initial States
         pass
 
-    def __init_states(self):
+    def init_states(self):
         if 'logged-in' not in st.session_state:
             st.session_state['logged-in'] = False
 

@@ -50,7 +50,7 @@ class SB_CLIENT:
             with open(os.path.join("user_cookies.toml"),"w") as sp:
                 toml.dump({"stockPicks":[]},sp)
 
-            self.CONFIGS.__init_states() #reset
+            self.CONFIGS.init_states() #reset
 
             
         except Exception as e:

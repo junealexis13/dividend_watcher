@@ -8,7 +8,7 @@ import os
 if __name__ == "__main__":
     CONFIGS = STATE()
     CONFIGS.set_page_config()
-    CONFIGS.__init_states()
+    CONFIGS.init_states()
 
     #Landing Page
     st.image(r"resources/dividend_header2.png")
