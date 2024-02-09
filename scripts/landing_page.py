@@ -308,7 +308,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to monitor your wallet stats</h1>", unsafe_allow_html=True)
             login = st.button('Login now!')
             if login:
-                st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
+                try:
+                    st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
+                except:
+                    st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
         else:
             with st.form(key='get-wallet'):
                 if st.session_state['user_wallet'] is not None:
@@ -321,8 +324,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">No Wallet Detected</p>''', unsafe_allow_html=True)
                     create_wallet = st.form_submit_button('Create one',)
                     if create_wallet:
-                        st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
-
+                        try:
+                            st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
+                        except:
+                            st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
     def transaction_manager(self):
         buy_col , sell_col = st.columns([1,1], gap="small")
         with buy_col:
