@@ -2,6 +2,8 @@ from scripts import *
 from st_pages import Page, add_page_title, hide_pages, show_pages
 import os
 
+st.set_page_config(layout='centered',page_title='PSE-Div Screener',page_icon=os.path.join("resources","page_icon.ico"))
+
 st.image(r"resources/dividend_header2.png")
 UI = UI()
 Auth = SB_CLIENT()
@@ -29,6 +31,6 @@ with st.form("user-login-main"):
     if login:
         try:
             Auth.signIn_User(user_login,user_pass)
-            st.switch_page(os.path.join(os.getcwd(),"main.py"))
+            st.switch_page("main.py")
         except Exception as e:
             st.error(e)

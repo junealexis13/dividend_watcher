@@ -247,7 +247,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             login = st.button('Login now!',key='login-from-sectionviewer')
             if login:
                 try:
-                    st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
+                    st.switch_page(os.path.join("pages","login.py"))
                 except:
                     st.error("An error occured. Try to access the login in page sidebar. I will fix this next update. Sorry for inconvenience.")
 
@@ -309,7 +309,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             login = st.button('Login now!')
             if login:
                 try:
-                    st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
+                    st.switch_page(os.path.join("pages","login.py"))
                 except:
                     st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
         else:
@@ -325,7 +325,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     create_wallet = st.form_submit_button('Create one',)
                     if create_wallet:
                         try:
-                            st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
+                            st.switch_page(os.path.join("pages","manage_portfolio.py"))
                         except:
                             st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
     def transaction_manager(self):
