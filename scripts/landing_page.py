@@ -320,7 +320,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     if create_wallet:
                         st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
 
-    def transaction_manager(self, tx_writer: OTHERS):
+    def transaction_manager(self):
         buy_col , sell_col = st.columns([1,1], gap="small")
         with buy_col:
             with st.form(key="tx-manager-buy"):
@@ -347,8 +347,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     self.SB_Client.fetch_all_user_transactions()
 
         st.divider()
+        
         with st.expander("Transactions"):
-            [tx_writer.write_trans(tx_type=x['tx_type'],equity=x['equity'],volume=x["volume"]) for x in st.session_state['user_transactions']['user_transactions']]
+            tx_writer = OTHERS()
+            [tx_writer.write_trans(tx_type=x['tx_type'],equity=x['equity'],volume=x["volume"],pps=x['pps'],dt=x['tx_date']) for x in st.session_state['user_transactions']['user_transactions']]
 
 
 class Section_Objects:

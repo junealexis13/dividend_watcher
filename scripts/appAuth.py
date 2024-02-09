@@ -4,7 +4,7 @@ import hashlib
 import streamlit as st
 from supabase import create_client, Client
 from typing import Literal
-
+from scripts.app_state import STATE
 
 
 class SB_CLIENT:
@@ -14,6 +14,8 @@ class SB_CLIENT:
 
         #Init Client
         self.SB_Client: Client = create_client(self.SB_URL, self.SB_KEY)
+
+        self.CONFIGS = STATE()
 
     def register_User(self, email: str, password: str, data: dict, *args):
 
@@ -48,7 +50,9 @@ class SB_CLIENT:
             with open(os.path.join("user_cookies.toml"),"w") as sp:
                 toml.dump({"stockPicks":[]},sp)
 
-            st.rerun()
+            self.CONFIGS.__init_states() #reset
+
+            
         except Exception as e:
             st.error(e)
 
