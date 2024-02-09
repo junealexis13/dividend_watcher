@@ -246,7 +246,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to use stock viewer</h1>", unsafe_allow_html=True)
             login = st.button('Login now!',key='login-from-sectionviewer')
             if login:
-                st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
+                try:
+                    st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
+                except:
+                    st.error("An error occured. Try to access the login in page sidebar. I will fix this next update. Sorry for inconvenience.")
 
     def portfolio_manager_UI(self):
 
