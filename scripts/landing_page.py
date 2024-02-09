@@ -29,7 +29,7 @@ class UI:
 
     def login_ui(self):
         with st.container(border=True):
-            st.markdown("<p style='color: black;'>Account Login</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color: white;font-size: 1.5rem;'>Account Login</p>", unsafe_allow_html=True)
             user_login = st.text_input(label="user",type="default")
             user_pass = st.text_input(label="password",type="password")
             return user_login, user_pass
@@ -244,6 +244,9 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
 
         else:
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to use stock viewer</h1>", unsafe_allow_html=True)
+            login = st.button('Login now!',key='login-from-sectionviewer')
+            if login:
+                st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
 
     def portfolio_manager_UI(self):
 
@@ -300,6 +303,9 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
     def wallet_manager(self):
         if not st.session_state["logged-in"]:
             st.markdown(f"<h1 style='text-align: center;padding-top: 0;'>Log in to monitor your wallet stats</h1>", unsafe_allow_html=True)
+            login = st.button('Login now!')
+            if login:
+                st.switch_page(os.path.join(os.getcwd(),"pages","login.py"))
         else:
             with st.form(key='get-wallet'):
                 if st.session_state['user_wallet'] is not None:
@@ -314,7 +320,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     if create_wallet:
                         st.switch_page(os.path.join(os.getcwd(),"pages","manage_portfolio.py"))
 
-    def transaction_manager(self):
+    def transaction_manager(self, tx_writer: OTHERS):
         buy_col , sell_col = st.columns([1,1], gap="small")
         with buy_col:
             with st.form(key="tx-manager-buy"):
@@ -326,6 +332,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 if submit_buy:
                     self.SB_Client.create_user_transactions('buy',choose_stock_buy,price_per_share=(pps_buy),volume=int(volume_buy),wallet_id=st.session_state['active_wallet'][0]['wallet_id'])
                     st.info(f"Bought {volume_buy} shares of {choose_stock_buy} for ₱{int(volume_buy)*float(pps_buy):,.2f}")
+                    self.SB_Client.fetch_all_user_transactions()
 
         with sell_col:
             with st.form(key="tx-manager-sell"):
@@ -337,6 +344,12 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                 if submit_sell:
                     self.SB_Client.create_user_transactions('sell',choose_stock_sell,price_per_share=pps_sell,volume=int(volume_sell),wallet_id=st.session_state['active_wallet'][0]['wallet_id'])
                     st.info(f"Sold {volume_sell} shares of {choose_stock_sell} for ₱{int(volume_sell)*float(pps_sell):,.2f}")
+                    self.SB_Client.fetch_all_user_transactions()
+
+        st.divider()
+        with st.expander("Transactions"):
+            [tx_writer.write_trans(tx_type=x['tx_type'],equity=x['equity'],volume=x["volume"]) for x in st.session_state['user_transactions']['user_transactions']]
+
 
 class Section_Objects:
     def __init__(self) -> None:

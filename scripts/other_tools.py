@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import os, re, datetime, toml
-
+from typing import Literal
 
 class ADDRESS_TOOLS:
     '''
@@ -55,7 +55,6 @@ class USER_INFO_MNGR:
     def get_full_address(self):
         return f"{self.brgy}, {self.citymuni}, {self.prov}, {self.reg}"
     
-
 class TECHNICAL_ANALYSIS_TOOLS:
     '''
     Useful tools for calculating several TA indicators
@@ -77,3 +76,12 @@ class TECHNICAL_ANALYSIS_TOOLS:
 
         return 100 - (100 / (1 + (avg_up/avg_down)))
     
+class OTHERS:
+    def __init__(self) -> None:
+        pass
+
+    def write_trans(self, tx_type: Literal['buy','sell'], equity: str, volume: int, pps: float, dt: str):
+        if tx_type == "buy":
+            st.write(f":moneybag::moneybag: -- Bought {equity} | Volume: {volume} | Price: {pps} | Value: {volume*pps} | Transaction Date: {dt}")
+        elif tx_type == "sell":
+            st.write(f":money_with_wings::money_with_wings: -- Bought {equity} | Volume: {volume} | Price: {pps} | Value: {volume*pps} | Transaction Date: {dt}")

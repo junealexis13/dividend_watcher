@@ -21,14 +21,6 @@ if __name__ == "__main__":
 
     A.introduction()
 
-    show_pages([
-        Page("main.py","Home",":house_with_garden:", is_section=True),
-        Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
-        Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:")
-        ])
-
-
-
     ####UI CODES AFTER HERE####
 
 
@@ -39,28 +31,13 @@ if __name__ == "__main__":
                 
             show_pages([
                 Page("main.py","Home",":house_with_garden:", is_section=True),
-                Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
+                Page(os.path.join("pages","login.py"),"Login",":pencil:"),
+                Page(os.path.join("pages","signup.py"),"User Sign-Up",":key:"),
                 Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
-                Page(os.path.join("pages","author.py"),"Author",":boy:")
-                ])
-            with st.form("user-login-main"):
-                user_login,user_pass = A.login_ui()
+                Page(os.path.join("pages","author.py"),"Author",":boy:"),
 
-                login = st.form_submit_button(label="Sign in")
-                if login:
-                    try:
-                        if (user_login, user_pass) == (st.secrets['admin']['USER'],st.secrets['admin']['PASSWORD']):
-                            st.session_state['logged-in'] = True
-                            st.session_state['is_admin'] = True
-                            st.rerun()
-                        else:
-                            Auth.signIn_User(user_login,user_pass)
-                            Auth.fetch_user_info()
-                            st.rerun()
-                    except Exception as e:
-                        st.error(e)
-                    
-                
+                ])
+            
         elif st.session_state["logged-in"]:
             show_pages([
                 Page("main.py","Home",":house_with_garden:", is_section=True),

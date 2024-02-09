@@ -9,13 +9,14 @@ if st.session_state['logged-in']:
     show_pages([
         Page("main.py","Home",":house_with_garden:", is_section=True),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
-        Page(os.path.join("pages","author.py"),"Author",":boy:")
+        Page(os.path.join("pages","login.py"),"Login",":pencil:")
         ])
 else:
     show_pages([
         Page("main.py","Home",":house_with_garden:", is_section=True),
         Page(os.path.join("pages","login.py"),"User Sign-Up",":pencil:"),
         Page(os.path.join("pages","manage_portfolio.py"),"Manage Portfolio",":money_mouth_face:"),
+        Page(os.path.join("pages","author.py"),"Author",":boy:"),
         Page(os.path.join("pages","author.py"),"Author",":boy:")
         ])
 

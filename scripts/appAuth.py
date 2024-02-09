@@ -17,10 +17,6 @@ class SB_CLIENT:
 
     def register_User(self, email: str, password: str, data: dict, *args):
 
-        def encrypt_password(password = password):
-            encrypted_pword = hashlib.sha256(password.encode()).hexdigest()
-            return encrypted_pword
-
         res = self.SB_Client.auth.sign_up(
             {
                 "email": email,
@@ -41,6 +37,8 @@ class SB_CLIENT:
     
         st.session_state['logged-in'] = True
         self.fetch_all_user_sp()
+        self.fetch_all_user_wallet()
+        self.fetch_all_user_transactions()
 
     def signOut(self):
         try:
@@ -129,8 +127,8 @@ class SB_CLIENT:
             st.session_state["user_wallet"] = update_picks
 
     def fetch_all_user_transactions(self):
-        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date").eq("id",self.fetch_user_info("id")).execute()
-        update_picks = {"stockPicks":data.data}
+        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date","volume").eq("id",self.fetch_user_info("id")).execute()
+        update_picks = {"user_transactions":data.data}
 
         if len(update_picks) != 0 or data is not None:
             st.session_state["user_transactions"] = update_picks
