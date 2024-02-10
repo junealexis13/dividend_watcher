@@ -51,9 +51,11 @@ with pm:
     if st.session_state["logged-in"]:
         UI.portfolio_manager_UI()
     else:
-        st.divider()
         UI.content_unavailable()
 
 with tx:
     if st.session_state["logged-in"]:
         UI.transaction_manager()
+
+    else:
+        UI.content_unavailable()
