@@ -42,6 +42,10 @@ class SB_CLIENT:
         self.fetch_all_user_wallet()
         self.fetch_all_user_transactions()
 
+        #set default wallet
+        wallet = [x['wallet_name'] for x in st.session_state['user_wallet']['wallet']]
+        self.set_active_wallet(wallet=wallet[0])
+
     def signOut(self):
         try:
             res = self.SB_Client.auth.sign_out()
@@ -93,6 +97,9 @@ class SB_CLIENT:
             case "id":
                 return user_dict.id
 
+    def set_active_wallet(self, wallet):
+        st.session_state['active_wallet'] = [x for x in st.session_state['user_wallet']['wallet'] if x['wallet_name'] == wallet]
+        
 
     def create_selection(self):
         try:

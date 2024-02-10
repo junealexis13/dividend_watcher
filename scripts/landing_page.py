@@ -318,8 +318,9 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     wallet = st.selectbox('Select your active wallet.',options=[x['wallet_name'] for x in st.session_state['user_wallet']['wallet']], index=0)
                     load_wallet = st.form_submit_button('Set as active')
                     if load_wallet:
-                        st.session_state['active_wallet'] = [x for x in st.session_state['user_wallet']['wallet'] if x['wallet_name'] == wallet]
+                        self.SB_Client.set_active_wallet(wallet=wallet)
                         st.info(f"Active Wallet Set!")
+                        
                 else:
                     st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">No Wallet Detected</p>''', unsafe_allow_html=True)
                     create_wallet = st.form_submit_button('Create one',)
