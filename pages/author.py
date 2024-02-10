@@ -54,7 +54,7 @@ with st.container(border=False):
 <br><br>Fast forward through a monthly bootcamp subscription, lots of coffee (big up, CAFFEINE!☕☕☕), and a sprinkle of that GENERATIVE AI magic 🤖✨ and bam! Here I am, cooking up both goofy and hopefully kinda useful stuff. It's a wild ride, and I'm living for it. LOL.
 <br><br>Shoutout to all you awesome folks for riding this wave with me and supporting my app. I hope it brings a smile to your face or even solves a little problem. Your support means the world, for real. Here's to keeping it real and having a blast y'all stay cool! Cheers!🍻🍻🍻</p>''', unsafe_allow_html=True)
     st.divider()
-    st.markdown('''<p class="subheader_styling" >In case you want to reach out, here's my socials.</b></p>''', unsafe_allow_html=True)
     with st.container():
-        st.write("X (twitter): @juniekemz")
-        st.write("GitHub: junealexis13")
+        with open(os.path.join("resources","socials.html"),"r") as rd:
+            st.markdown(rd.read(),unsafe_allow_html=True)
+            rd.close()

@@ -36,15 +36,6 @@ with st.sidebar:
         Page(os.path.join("pages","author.py"),"Author",":boy:")
         ])
 
-        user_login,user_pass = UI.login_ui()
-
-        login = st.button("Sign in",key="login-button")
-        if login:
-            try:
-                Auth.signIn_User(user_login,user_pass)
-                st.rerun()
-            except Exception as e:
-                st.error(e)
 
 pm, tx = st.tabs(["Portfolio Manager","Wallet Transactions"])
 with pm:
