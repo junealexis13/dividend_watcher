@@ -84,4 +84,4 @@ class OTHERS:
         if tx_type == "buy":
             st.write(f":moneybag::moneybag: -- Bought {equity} | Volume: {volume} | Price: {pps} | Value: {volume*pps} | Transaction Date: {dt}")
         elif tx_type == "sell":
-            st.write(f":money_with_wings::money_with_wings: -- Bought {equity} | Volume: {volume} | Price: {pps} | Value: {volume*pps} | Transaction Date: {dt}")
+            st.write(f":money_with_wings::money_with_wings: -- Sold {equity} | Volume: {volume} | Price: {pps} | Value: {volume*pps} | Transaction Date: {dt}")
