@@ -73,7 +73,3 @@ if __name__ == "__main__":
 
     with viewer:
         A.section_body3()
-        
-
-    with st.expander("debug message"):
-        st.write(st.session_state['error_message'])

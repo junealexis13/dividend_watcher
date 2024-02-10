@@ -309,9 +309,11 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             login = st.button('Login now!')
             if login:
                 try:
-                    st.switch_page(os.path.join("pages","login.py"))
+                    st.switch_page("pages/login.py")
                 except:
                     st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
+
+
         else:
             with st.form(key='get-wallet'):
                 if st.session_state['user_wallet'] is not None:
@@ -320,13 +322,13 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                     if load_wallet:
                         self.SB_Client.set_active_wallet(wallet=wallet)
                         st.info(f"Active Wallet Set!")
-                        
+
                 else:
                     st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">No Wallet Detected</p>''', unsafe_allow_html=True)
                     create_wallet = st.form_submit_button('Create one',)
                     if create_wallet:
                         try:
-                            st.switch_page(os.path.join("pages","manage_portfolio.py"))
+                            st.switch_page("pages/login.py")
                         except:
                             st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
     def transaction_manager(self):

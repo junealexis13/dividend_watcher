@@ -37,5 +37,8 @@ class STATE:
         if "user_transactions" not in st.session_state:
             st.session_state["user_transactions"] = None
 
+        if 'wallet_stat' not in st.session_state:
+            st.session_state['wallet_stat'] = None
+
     def set_page_config(self):
         st.set_page_config(layout='centered',page_title='PSE-Div Screener',page_icon=os.path.join("resources","page_icon.ico"))
