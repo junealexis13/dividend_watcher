@@ -248,9 +248,9 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             if login:
                 try:
                     st.switch_page(os.path.join("pages","login.py"))
-                except:
+                except Exception as e:
                     st.error("An error occured. Try to access the login in page sidebar. I will fix this next update. Sorry for inconvenience.")
-
+                    print(e)
     def portfolio_manager_UI(self):
 
         st.markdown(f"<h1 style='text-align: center;'>Portfolio Manager</h1>", unsafe_allow_html=True)
@@ -309,10 +309,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             login = st.button('Login now!')
             if login:
                 try:
-                    st.switch_page("pages/login.py")
-                except:
+                    st.switch_page(os.path.join("pages","login.py"))
+                except Exception as e:
                     st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
-
+                    print(e)
 
         else:
             with st.form(key='get-wallet'):
