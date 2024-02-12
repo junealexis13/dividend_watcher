@@ -55,7 +55,7 @@ class SB_CLIENT:
                 toml.dump({"stockPicks":[]},sp)
 
             self.CONFIGS.init_states() #reset
-
+            st.rerun()
             
         except Exception as e:
             st.error(e)
