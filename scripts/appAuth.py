@@ -99,6 +99,7 @@ class SB_CLIENT:
 
     def set_active_wallet(self, wallet):
         st.session_state['active_wallet'] = [x for x in st.session_state['user_wallet']['wallet'] if x['wallet_name'] == wallet]
+        self.fetch_all_user_transactions()
         
 
     def create_selection(self):
@@ -138,11 +139,18 @@ class SB_CLIENT:
             st.session_state["user_wallet"] = update_picks
 
     def fetch_all_user_transactions(self):
-        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date","volume").eq("id",self.fetch_user_info("id")).execute()
+        data = self.SB_Client.table("Stocks_Transactions").select("tx_id","equity","tx_type","pps","tx_date","volume").eq("wallet",st.session_state["active_wallet"][0]['wallet_id']).execute()
+        print(data)
         update_picks = {"user_transactions":data.data}
 
         if len(update_picks) != 0 or data is not None:
             st.session_state["user_transactions"] = update_picks
+
+    def clear_transactions(self):
+        data, count = supabase.table('Stocks_Transactions')
+        .delete()
+        .eq('wallet', st.session_state["active_wallet"][0]['wallet_id'])
+        .execute()
 
     def create_user_transactions(self,tx_type: Literal["buy", "sell"], equity: str, price_per_share: float, volume: int, wallet_id: str):
         self.SB_Client.table("Stocks_Transactions").insert({"wallet": wallet_id, "pps":price_per_share, "tx_type": tx_type, "equity": equity, "volume":volume

@@ -323,6 +323,7 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                         self.SB_Client.set_active_wallet(wallet=wallet)
                         st.info(f"Active Wallet Set!")
 
+
                 else:
                     st.markdown(f'''<p style="font-size: 2rem; text-align: center; font-family: Arial;">No Wallet Detected</p>''', unsafe_allow_html=True)
                     create_wallet = st.form_submit_button('Create one',)
@@ -331,6 +332,15 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
                             st.switch_page("pages/login.py")
                         except:
                             st.error("An error occured. Try to access the page in sidebar. I will fix this next update. Sorry for inconvenience.")
+
+
+                        st.divider()
+
+            with st.expander("Transactions"):
+                self.SB_Client.fetch_all_user_transactions()
+                tx_writer = OTHERS()
+                [tx_writer.write_trans(tx_type=x['tx_type'],equity=x['equity'],volume=x["volume"],pps=x['pps'],dt=x['tx_date']) for x in st.session_state['user_transactions']['user_transactions']]
+
     def transaction_manager(self):
         buy_col , sell_col = st.columns([1,1], gap="small")
         with buy_col:
@@ -363,7 +373,10 @@ Welcome to the Dividend Screener app, your go-to platform for tracking and analy
             tx_writer = OTHERS()
             [tx_writer.write_trans(tx_type=x['tx_type'],equity=x['equity'],volume=x["volume"],pps=x['pps'],dt=x['tx_date']) for x in st.session_state['user_transactions']['user_transactions']]
 
-
+        st.divider()
+        
+        # with st.form(key = "delete-all-tx", clear_on_submit=True,border=False):
+        #     confirm = st.text_input("Type your registered birthday in MMDDYYYY to proceed",type="password", max_chars=8)
 class Section_Objects:
     def __init__(self) -> None:
         #Fetch recent market data

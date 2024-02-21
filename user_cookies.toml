@@ -1,1 +1,5 @@
-stockPicks = []
+[[stockPicks]]
+sp_name = "New Faves"
+picks = "[\"LTG\", \"SCC\", \"DMC\", \"PLC\", \"PGOLD\", \"SHNG\", \"CREIT\", \"DDMPR\"]"
+SP_id = "b45ae8ed-c8d8-440f-a5a8-a1409b085a9b"
+
