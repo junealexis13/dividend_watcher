@@ -138,3 +138,6 @@
 ✅✅✅ Updated --- 2024-07-31 16:24:56.904333
 ✅✅✅ Updated --- 2024-08-01 16:26:59.868947
 ✅✅✅ Updated --- 2024-08-02 16:26:59.221485
+########
+❌❌❌ Error encountered --- 2024-08-05 16:25:41.521945
+Error Message: 404 Client Error: Not Found for url: https://eodhistoricaldata.com/api/eod/PNXP.PSE?period=a&order=a&to=2024-08-05&fmt=json&api_token=658d35ad59ee62.06107883&from=2024-08-03+00%3A00%3A00
